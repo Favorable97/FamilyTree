@@ -24,6 +24,36 @@ namespace FamilyTree.Data.Context
             return _connection;
         }
 
+        public async Task<int> ExecuteCommandAsync(string sqlCommand, params DBParameter[] parameters)
+        {
+            var connection = await GetOpenConnection();
+
+            using var command = new SqlCommand(sqlCommand, connection);
+
+            foreach (var parameter in parameters)
+                command.Parameters.Add(parameter);
+
+            return await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task<DataTable> QueryAsync(string sqlQuery, params DBParameter[] parameters)
+        {
+            var connection = await GetOpenConnection();
+
+            using var command = new SqlCommand(sqlQuery, connection);
+
+            foreach (var parameter in parameters)
+                command.Parameters.Add(parameter);
+
+            using var adapter = new SqlDataAdapter(command);
+
+            var resultTable = new DataTable();
+
+            adapter.Fill(resultTable);
+
+            return resultTable;
+        }
+
         public async void Dispose()
         {
             await _connection.CloseAsync();
