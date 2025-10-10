@@ -10,16 +10,15 @@ namespace FamilyTree.Data.Repositories
     public class PersonRepository(FamilyTreeContext context) : IPersonRepository
     {
         private readonly FamilyTreeContext _context = context;
-        public Task AddPersonAsync(Person person)
+        public async Task AddPersonAsync(Person person)
         {
-            /*string sql =
+            string sql =
                 @"INSERT INTO Person (ID, LastName, FirstName, MiddleName, BirthDate, DeathDate, GenderID, MotherID, FatherID) 
-                VALUES (@ID, @LastName, @FirstName, @MiddleName, @BirthDate, @DeathDate, @GenderID, @MotherID, @FatherID)";
+                VALUES (@ID, @LastName, @FirstName, @MiddleName, @BirthDate, @DeathDate, @Gender, @MotherID, @FatherID)";
 
-            _context.
+            var parameters = ParametersParseSQLString.GetParamsFromCommand(sql, person);
 
-            return Task.FromResult(0);*/
-            throw new NotImplementedException();
+            await _context.ExecuteCommandAsync(sql, parameters);
         }
 
         public Task DeletePersonAsync(Guid id)
