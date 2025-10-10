@@ -31,7 +31,7 @@ namespace FamilyTree.Data.Context
             using var command = new SqlCommand(sqlCommand, connection);
 
             foreach (var parameter in parameters)
-                command.Parameters.Add(parameter);
+                command.Parameters.AddWithValue(parameter.Name, parameter.Value);
 
             return await command.ExecuteNonQueryAsync();
         }

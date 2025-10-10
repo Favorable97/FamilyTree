@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace FamilyTree.Data.Models
 {
-    public class Person
+    public record Person
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string LastName { get; set; } = null!;
-        public string FirstName { get; set; } = null!;
-        public string? MiddleName { get; set; }
-        public DateTime BirhDate { get; set; }
-        public DateTime? DeathDate { get; set; }
-        public Gender Gender { get; set; }
-        public Guid? MotherID { get; set; }
-        public Guid? FatherID {  get; set; }
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public string LastName { get; init; } = null!;
+        public string FirstName { get; init; } = null!;
+        public string? MiddleName { get; init; }
+        public DateTime BirthDate { get; init; }
+        public DateTime? DeathDate { get; init; }
+        public Gender Gender { get; init; }
+        public Guid? MotherID { get; init; }
+        public Guid? FatherID {  get; init; }
     }
 }
