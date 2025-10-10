@@ -9,4 +9,10 @@ var app = builder.Build();
 
 app.ExceptionMiddleware();
 
+app.MapPost("/ft/api/addPerson", async (IPersonService service, RequestAddPersonDTO dto) =>
+{
+    await service.AddPerson(dto);
+});
+
 app.Run();
+
