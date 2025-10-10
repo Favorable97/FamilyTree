@@ -24,5 +24,10 @@ namespace FamilyTree.API.Services
 
             await _repository.AddPersonAsync(person);
         }
+
+        public async Task SetParentAsync(Guid childId, RequestSetParentDTO requestSetParentDTO)
+        {
+            await _repository.SetParentAsync(childId, requestSetParentDTO.ParentId, requestSetParentDTO.ParentRelation);
+        }
     }
 }

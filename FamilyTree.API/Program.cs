@@ -9,9 +9,14 @@ var app = builder.Build();
 
 app.ExceptionMiddleware();
 
-app.MapPost("/ft/api/addPerson", async (IPersonService service, RequestAddPersonDTO dto) =>
+app.MapPost("/ft/api/addPerson", async (IPersonService service, RequestAddPersonDTO data) =>
 {
-    await service.AddPerson(dto);
+    await service.AddPerson(data);
+});
+
+app.MapPost("/ft/api/person/{childId}/setParent", async (IPersonService service, Guid childId, RequestSetParentDTO data) =>
+{
+    await service.SetParentAsync(childId, data);
 });
 
 app.Run();

@@ -40,5 +40,13 @@ namespace FamilyTree.Data.Interfaces
         /// <param name="id">ID человека</param>
         /// <returns></returns>
         public Task DeletePersonAsync(Guid id);
+        /// <summary>
+        /// Связь ребенка с родителями
+        /// </summary>
+        /// <param name="childId">Идентификатор ребенка</param>
+        /// <param name="parentId">Идентификатор родителя</param>
+        /// <param name="parentRelation">Тип связи</param>
+        /// <returns></returns>
+        public Task SetParentAsync(Guid childId, Guid parentId, ParentRelation parentRelation);
     }
 }

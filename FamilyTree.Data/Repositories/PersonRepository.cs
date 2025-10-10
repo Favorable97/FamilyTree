@@ -13,8 +13,8 @@ namespace FamilyTree.Data.Repositories
         public async Task AddPersonAsync(Person person)
         {
             string sql =
-                @"INSERT INTO Person (ID, LastName, FirstName, MiddleName, BirthDate, DeathDate, GenderID, MotherID, FatherID) 
-                VALUES (@ID, @LastName, @FirstName, @MiddleName, @BirthDate, @DeathDate, @Gender, @MotherID, @FatherID)";
+                @"INSERT INTO Person (Id, LastName, FirstName, MiddleName, BirthDate, DeathDate, GenderId, MotherId, FatherId) 
+                VALUES (@Id, @LastName, @FirstName, @MiddleName, @BirthDate, @DeathDate, @Gender, @MotherId, @FatherId)";
 
             var parameters = ParametersParseSQLString.GetParamsFromCommand(sql, person);
 
@@ -39,6 +39,20 @@ namespace FamilyTree.Data.Repositories
         public Task UpdatePersonAsync(Person person)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task SetParentAsync(Guid childId, Guid parentId, ParentRelation parentRelation)
+        {
+            string relation = parentRelation == ParentRelation.Mother ? "MotherId" : "FatherId";
+            string sql = $"UPDATE Person SET {relation} = @ParentId WHERE ID = @Id";
+
+            DBParameter[] parameters =
+            [
+                DBParameter.Create("@ParentId", parentId),
+                DBParameter.Create("@Id", childId)
+            ];
+
+            await _context.ExecuteCommandAsync(sql, parameters);
         }
     }
 }
