@@ -1,5 +1,6 @@
 ﻿using FamilyTree.API.Interfaces;
 using FamilyTree.Data.Models;
+using FamilyTree.Data.Interfaces;
 
 namespace FamilyTree.API.Services
 {
@@ -7,9 +8,10 @@ namespace FamilyTree.API.Services
     {
         private readonly IPersonRepository _repository = repository;
 
+        // Todo Сделать валидацию входных данных везде и обработку ошибок
+
         public async Task AddPerson(RequestAddPersonDTO requestAddPersonDTO)
         {
-            // Todo Сделать валидацию входных данных
             var person = new Person()
             {
                 LastName = requestAddPersonDTO.LastName,
@@ -25,9 +27,20 @@ namespace FamilyTree.API.Services
             await _repository.AddPersonAsync(person);
         }
 
+        public async Task<List<Person>> GetAllPersonAsync()
+        {
+            List<Person> persons = await _repository.GetAllPersonAsync();
+
+            return persons;
+        }
         public async Task SetParentAsync(Guid childId, RequestSetParentDTO requestSetParentDTO)
         {
             await _repository.SetParentAsync(childId, requestSetParentDTO.ParentId, requestSetParentDTO.ParentRelation);
+        }
+
+        public async Task DeletePersonAsync(Guid id)
+        {
+            await _repository.DeletePersonAsync(id);
         }
     }
 }

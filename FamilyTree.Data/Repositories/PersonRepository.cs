@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,8 @@ namespace FamilyTree.Data.Repositories
 {
     public class PersonRepository(FamilyTreeContext context) : IPersonRepository
     {
+        // Todo сделать обработку ошибок
+
         private readonly FamilyTreeContext _context = context;
         public async Task AddPersonAsync(Person person)
         {
@@ -21,14 +24,22 @@ namespace FamilyTree.Data.Repositories
             await _context.ExecuteCommandAsync(sql, parameters);
         }
 
-        public Task DeletePersonAsync(Guid id)
+        public async Task DeletePersonAsync(Guid id)
         {
-            throw new NotImplementedException();
+            string sql = @"DELETE FROM Person WHERE Id = @ID";
+
+            DBParameter parameter = DBParameter.Create("@ID", id);
+
+            await _context.ExecuteCommandAsync(sql, parameter);
         }
 
-        public Task<List<Person>> GetAllPersonAsync()
+        public async Task<List<Person>> GetAllPersonAsync()
         {
-            throw new NotImplementedException();
+            string sql = @"SELECT * FROM Person";
+
+            DataTable result = await _context.QueryAsync(sql);
+
+            return result.ConvertToListPerson();
         }
 
         public Task<Person?> GetPersonByIdAsync(Guid id)
