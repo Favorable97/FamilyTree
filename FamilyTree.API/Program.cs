@@ -9,24 +9,24 @@ var app = builder.Build();
 
 app.ExceptionMiddleware();
 
-app.MapGet("/ft/api/getAllPerson", async (IPersonService service) =>
+app.MapGet("/ft/api/persons", async (IPersonService service) =>
 {
     var result = await service.GetAllPersonAsync();
 
     Results.Ok(result);
 });
 
-app.MapPost("/ft/api/addPerson", async (IPersonService service, RequestAddPersonDTO data) =>
+app.MapPost("/ft/api/persons", async (IPersonService service, RequestAddPersonDTO data) =>
 {
     await service.AddPerson(data);
 });
 
-app.MapPost("/ft/api/person/{childId}/setParent", async (IPersonService service, Guid childId, RequestSetParentDTO data) =>
+app.MapPost("/ft/api/persons/{childId}/setParent", async (IPersonService service, Guid childId, RequestSetParentDTO data) =>
 {
     await service.SetParentAsync(childId, data);
 });
 
-app.MapDelete("/ft/api/person/{id}/deletePerson", async (IPersonService service, Guid id) =>
+app.MapDelete("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
 {
     await service.DeletePersonAsync(id);
 });
