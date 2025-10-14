@@ -1,29 +1,22 @@
-﻿using FamilyTree.Data.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FamilyTree.Data.Models
+﻿namespace FamilyTree.API.DTO
 {
     /// <summary>
-    /// Модель человека
+    /// DTO для передачи информации о человеке и его родителях
     /// </summary>
-    public record Person
+    public class PersonDTO
     {
         /// <summary>
         /// Уникальный идентификатор
         /// </summary>
-        public Guid Id { get; init; } = Guid.NewGuid();
+        public Guid Id { get; init; }
         /// <summary>
         /// Фамилия
         /// </summary>
-        public string LastName { get; init; } = null!;
+        public string LastName { get; init; } = string.Empty!;
         /// <summary>
         /// Имя
         /// </summary>
-        public string FirstName { get; init; } = null!;
+        public string FirstName { get; init; } = string.Empty!;
         /// <summary>
         /// Отчество
         /// </summary>
@@ -41,12 +34,12 @@ namespace FamilyTree.Data.Models
         /// </summary>
         public Gender Gender { get; init; }
         /// <summary>
-        /// Идентификатор мамы
+        /// Сссылка на маму человека
         /// </summary>
-        public Guid? MotherID { get; init; }
+        public PersonDTO? Mother { get; init; }
         /// <summary>
-        /// Идентификатор отца
+        /// Ссылка на отца человека
         /// </summary>
-        public Guid? FatherID {  get; init; }
+        public PersonDTO? Father { get; init; }
     }
 }

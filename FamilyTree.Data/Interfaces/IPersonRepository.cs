@@ -16,29 +16,40 @@ namespace FamilyTree.Data.Interfaces
         /// </summary>
         /// <returns></returns>
         public Task<List<Person>> GetAllPersonAsync();
+
         /// <summary>
-        /// Получить человека со ссылками на родителей
+        /// Получить человека без родителей
         /// </summary>
         /// <param name="id">ID человека</param>
         /// <returns></returns>
         public Task<Person?> GetPersonByIdAsync(Guid id);
         /// <summary>
+        /// Получить человека с родителями
+        /// </summary>
+        /// <param name="id">ID человека</param>
+        /// <returns></returns>
+        
+        public Task<Person?> GetPersonByIdWithParentsAsync(Guid id);
+        /// <summary>
         /// Добавить нового человека
         /// </summary>
         /// <param name="person">Добавляемая информация о человеке</param>
         /// <returns></returns>
+        
         public Task AddPersonAsync(Person person);
         /// <summary>
         /// Обновление информации о человеке
         /// </summary>
         /// <param name="person">Информация о человеке</param>
         /// <returns></returns>
+        
         public Task UpdatePersonAsync(Person person);
         /// <summary>
         /// Удаление человека по ID
         /// </summary>
         /// <param name="id">ID человека</param>
         /// <returns></returns>
+        
         public Task DeletePersonAsync(Guid id);
         /// <summary>
         /// Связь ребенка с родителями
@@ -47,6 +58,7 @@ namespace FamilyTree.Data.Interfaces
         /// <param name="parentId">Идентификатор родителя</param>
         /// <param name="parentRelation">Тип связи</param>
         /// <returns></returns>
+        
         public Task SetParentAsync(Guid childId, Guid parentId, ParentRelation parentRelation);
     }
 }

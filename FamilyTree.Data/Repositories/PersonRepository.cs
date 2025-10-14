@@ -39,10 +39,21 @@ namespace FamilyTree.Data.Repositories
 
             DataTable result = await _context.QueryAsync(sql);
 
-            return result.ConvertToListPerson();
+            return ConvertData.ConvertToListPerson(result);
         }
 
-        public Task<Person?> GetPersonByIdAsync(Guid id)
+        public async Task<Person?> GetPersonByIdAsync(Guid id)
+        {
+            string sql = @"SELECT * FROM Person WHERE Id = @ID";
+
+            DBParameter parameter = DBParameter.Create("@ID", id);
+
+            var result = await _context.QueryAsync(sql, parameter);
+
+            return ConvertData.ConvertToListPerson(result).FirstOrDefault();
+        }
+
+        public Task<Person?> GetPersonByIdWithParentsAsync(Guid id)
         {
             throw new NotImplementedException();
         }
