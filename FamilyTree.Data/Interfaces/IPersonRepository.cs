@@ -18,18 +18,11 @@ namespace FamilyTree.Data.Interfaces
         public Task<List<Person>> GetAllPersonAsync();
 
         /// <summary>
-        /// Получить человека без родителей
+        /// Получить человека
         /// </summary>
         /// <param name="id">ID человека</param>
         /// <returns></returns>
         public Task<Person?> GetPersonByIdAsync(Guid id);
-        /// <summary>
-        /// Получить человека с родителями
-        /// </summary>
-        /// <param name="id">ID человека</param>
-        /// <returns></returns>
-        
-        public Task<Person?> GetPersonByIdWithParentsAsync(Guid id);
         /// <summary>
         /// Добавить нового человека
         /// </summary>

@@ -36,10 +36,10 @@
         /// <summary>
         /// Сссылка на маму человека
         /// </summary>
-        public PersonDTO? Mother { get; init; }
+        public PersonDTO? Mother { get; set; }
         /// <summary>
         /// Ссылка на отца человека
         /// </summary>
-        public PersonDTO? Father { get; init; }
+        public PersonDTO? Father { get; set; }
     }
 }

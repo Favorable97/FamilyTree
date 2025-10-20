@@ -16,9 +16,16 @@ app.MapGet("/ft/api/persons", async (IPersonService service) =>
     Results.Ok(result);
 });
 
+app.MapGet("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
+{
+    var result = await service.GetPersonByIdAsync(id);
+
+    Results.Ok(result);
+});
+
 app.MapPost("/ft/api/persons", async (IPersonService service, RequestAddPersonDTO data) =>
 {
-    await service.AddPerson(data);
+    await service.AddPersonAsync(data);
 });
 
 app.MapPost("/ft/api/persons/{childId}/setParent", async (IPersonService service, Guid childId, RequestSetParentDTO data) =>

@@ -53,11 +53,6 @@ namespace FamilyTree.Data.Repositories
             return ConvertData.ConvertToListPerson(result).FirstOrDefault();
         }
 
-        public Task<Person?> GetPersonByIdWithParentsAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task UpdatePersonAsync(Person person)
         {
             throw new NotImplementedException();
