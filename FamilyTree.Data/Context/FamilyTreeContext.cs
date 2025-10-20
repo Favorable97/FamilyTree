@@ -43,7 +43,7 @@ namespace FamilyTree.Data.Context
             using var command = new SqlCommand(sqlQuery, connection);
 
             foreach (var parameter in parameters)
-                command.Parameters.Add(parameter);
+                command.Parameters.AddWithValue(parameter.Name, parameter.Value);
 
             using var adapter = new SqlDataAdapter(command);
 
