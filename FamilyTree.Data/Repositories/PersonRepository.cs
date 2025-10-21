@@ -16,7 +16,7 @@ namespace FamilyTree.Data.Repositories
         public async Task AddPersonAsync(Person person)
         {
             string sql =
-                @"INSERT INTO Person (Id, LastName, FirstName, MiddleName, BirthDate, DeathDate, GenderId, MotherId, FatherId) 
+                @"INSERT INTO Person (Id, LastName, FirstName, MiddleName, BirthDate, DeathDate, Gender, MotherId, FatherId) 
                 VALUES (@Id, @LastName, @FirstName, @MiddleName, @BirthDate, @DeathDate, @Gender, @MotherId, @FatherId)";
 
             var parameters = ParametersParseSQLString.GetParamsFromCommand(sql, person);

@@ -23,7 +23,7 @@ namespace FamilyTree.Data.Utils
                     MiddleName = dr["MiddleName"].ToString(),
                     BirthDate = DateTime.Parse(dr["BirthDate"].ToString()!),
                     DeathDate = !DateTime.TryParse(dr["DeathDate"].ToString(), out DateTime dateDeath) ? null : dateDeath,
-                    Gender = (Gender)dr["GenderId"],
+                    Gender = (Gender)dr["Gender"],
                     MotherID = !Guid.TryParse(dr["MotherId"].ToString(), out Guid motherId) ? null : motherId,
                     FatherID = !Guid.TryParse(dr["FatherId"].ToString(), out Guid fatherId) ? null : fatherId,
                 };
