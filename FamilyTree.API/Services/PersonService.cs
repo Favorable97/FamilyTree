@@ -1,6 +1,7 @@
 ﻿using FamilyTree.API.Interfaces;
 using FamilyTree.Data.Models;
 using FamilyTree.Data.Interfaces;
+using FamilyTree.API.Mappers;
 
 namespace FamilyTree.API.Services
 {
@@ -36,54 +37,7 @@ namespace FamilyTree.API.Services
         {
             var person = await _repository.GetPersonByIdAsync(id);
 
-            PersonDTO motherDTO = null,
-                fatherDTO = null;
-
-            if (person.MotherID.HasValue)
-            {
-                var mother = await _repository.GetPersonByIdAsync(person.MotherID.Value);
-
-                if (mother is not null)
-                {
-                    motherDTO = Map(mother);
-                }
-            }
-
-            if (person.FatherID.HasValue)
-            {
-                var father = await _repository.GetPersonByIdAsync(person.FatherID.Value);
-
-                if (father is not null)
-                {
-                    fatherDTO = Map(father);
-                }
-            }
-
-            var personDTO = new PersonDTO()
-            {
-                Id = person.Id,
-                LastName = person.LastName,
-                FirstName = person.FirstName,
-                MiddleName = person.MiddleName,
-                BirthDate = person.BirthDate,
-                DeathDate = person.DeathDate,
-                Gender = person.Gender,
-                Mother = motherDTO ?? null,
-                Father = fatherDTO ?? null
-            };
-
-            static PersonDTO Map(Person person) => new()
-            {
-                Id = person.Id,
-                LastName = person.LastName,
-                FirstName = person.FirstName,
-                MiddleName = person.MiddleName,
-                BirthDate = person.BirthDate,
-                DeathDate = person.DeathDate,
-                Gender = person.Gender
-            };
-
-            return personDTO;
+            return await PersonMapper.MapToPersonDTO(person, _repository.GetPersonByIdAsync);
         }
         public async Task SetParentAsync(Guid childId, RequestSetParentDTO requestSetParentDTO)
         {
