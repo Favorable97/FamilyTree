@@ -28,6 +28,11 @@ app.MapPost("/ft/api/persons", async (IPersonService service, RequestAddPersonDT
     await service.AddPersonAsync(data);
 });
 
+app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, Guid id, RequestUpdatePersonDTO data) =>
+{
+    await service.UpdatePersonAsync(id, data);
+});
+
 app.MapPost("/ft/api/persons/{childId}/setParent", async (IPersonService service, Guid childId, RequestSetParentDTO data) =>
 {
     await service.SetParentAsync(childId, data);

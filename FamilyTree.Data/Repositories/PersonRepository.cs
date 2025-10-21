@@ -53,9 +53,23 @@ namespace FamilyTree.Data.Repositories
             return ConvertData.ConvertToListPerson(result).FirstOrDefault();
         }
 
-        public Task UpdatePersonAsync(Person person)
+        public async Task UpdatePersonAsync(Person person)
         {
-            throw new NotImplementedException();
+            string sql = @"
+                UPDATE Person
+                SET	LastName = @LastName,
+	                FirstName = @FirstName,
+	                MiddleName = @MiddleName,
+	                BirthDate = @BirthDate,
+	                DeathDate = @DeathDate,
+	                Gender = @Gender,
+	                MotherId = @MotherId,
+	                FatherId = @FatherId
+                WHERE Id = @Id";
+
+            var parameters = ParametersParseSQLString.GetParamsFromCommand(sql, person);
+
+            await _context.ExecuteCommandAsync(sql, parameters);
         }
 
         public async Task SetParentAsync(Guid childId, Guid parentId, ParentRelation parentRelation)
