@@ -45,16 +45,7 @@ namespace FamilyTree.API.Services
 
                 if (mother is not null)
                 {
-                    motherDTO = new PersonDTO
-                    {
-                        Id = mother.Id,
-                        LastName = mother.LastName,
-                        FirstName = mother.FirstName,
-                        MiddleName = mother.MiddleName,
-                        BirthDate = mother.BirthDate,
-                        DeathDate = mother.DeathDate,
-                        Gender = mother.Gender
-                    };
+                    motherDTO = Map(mother);
                 }
             }
 
@@ -64,16 +55,7 @@ namespace FamilyTree.API.Services
 
                 if (father is not null)
                 {
-                    fatherDTO = new PersonDTO
-                    {
-                        Id = father.Id,
-                        LastName = father.LastName,
-                        FirstName = father.FirstName,
-                        MiddleName = father.MiddleName,
-                        BirthDate = father.BirthDate,
-                        DeathDate = father.DeathDate,
-                        Gender = father.Gender
-                    };
+                    fatherDTO = Map(father);
                 }
             }
 
@@ -88,6 +70,17 @@ namespace FamilyTree.API.Services
                 Gender = person.Gender,
                 Mother = motherDTO ?? null,
                 Father = fatherDTO ?? null
+            };
+
+            static PersonDTO Map(Person person) => new()
+            {
+                Id = person.Id,
+                LastName = person.LastName,
+                FirstName = person.FirstName,
+                MiddleName = person.MiddleName,
+                BirthDate = person.BirthDate,
+                DeathDate = person.DeathDate,
+                Gender = person.Gender
             };
 
             return personDTO;
