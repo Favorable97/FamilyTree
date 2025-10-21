@@ -1,14 +1,14 @@
 ﻿namespace FamilyTree.API.DTO
 {
-    public class RequestUpdatePersonDTO
+    public record RequestUpdatePersonDTO
     {
-        public string? LastName { get; set; }
-        public string? FirstName { get; set; }
-        public string? MiddleName { get; set; }
-        public DateTime? BirthDate { get; set; }
-        public DateTime? DeathDate { get; set; }
-        public Gender? Gender { get; set; }
-        public Guid? MotherID { get; set; }
-        public Guid? FatherID { get; set; }
+        public string? LastName { get; init; }
+        public string? FirstName { get; init; }
+        public string? MiddleName { get; init; }
+        public DateTime? BirthDate { get; init; }
+        public DateTime? DeathDate { get; init; }
+        public Gender? Gender { get; init; }
+        public Guid? MotherID { get; init; }
+        public Guid? FatherID { get; init; }
     }
 }

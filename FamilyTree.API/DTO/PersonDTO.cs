@@ -3,7 +3,7 @@
     /// <summary>
     /// DTO для передачи информации о человеке и его родителях
     /// </summary>
-    public class PersonDTO
+    public record PersonDTO
     {
         /// <summary>
         /// Уникальный идентификатор
@@ -36,10 +36,10 @@
         /// <summary>
         /// Сссылка на маму человека
         /// </summary>
-        public PersonDTO? Mother { get; set; }
+        public PersonDTO? Mother { get; init; }
         /// <summary>
         /// Ссылка на отца человека
         /// </summary>
-        public PersonDTO? Father { get; set; }
+        public PersonDTO? Father { get; init; }
     }
 }
