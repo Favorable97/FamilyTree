@@ -33,11 +33,11 @@ namespace FamilyTree.API.Services
             List<Person> persons = await _repository.GetAllPersonAsync();
             return persons;
         }
-        public async Task<PersonDTO> GetPersonByIdAsync(Guid id)
+        public async Task<PersonDTO?> GetPersonByIdAsync(Guid id)
         {
-            var person = await _repository.GetPersonByIdAsync(id);
+            Person? person = await _repository.GetPersonByIdAsync(id);
 
-            return await PersonMapper.MapToPersonDTO(person, _repository.GetPersonByIdAsync);
+            return await PersonMapper.MapToPersonDTO(person, _repository.GetPersonByIdAsync!);
         }
         public async Task SetParentAsync(Guid childId, RequestSetParentDTO requestSetParentDTO)
         {
