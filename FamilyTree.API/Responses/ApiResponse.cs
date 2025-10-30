@@ -1,10 +1,10 @@
 ﻿namespace FamilyTree.API.Responses
 {
-    public class ApiResponse<T>
+    public record ApiResponse<T>
     {
-        public bool Success { get; set; }
-        public T? Data { get; set; }
-        public string? Message { get; set; } = string.Empty!;
+        public bool Success { get; init; }
+        public T? Data { get; init; }
+        public string? Message { get; init; } = string.Empty!;
         
         private ApiResponse(bool success, T? data, string message)
         {
