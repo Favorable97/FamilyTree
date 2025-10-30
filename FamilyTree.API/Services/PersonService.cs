@@ -4,6 +4,7 @@ using FamilyTree.Data.Interfaces;
 using FamilyTree.API.Mappers;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
+using FamilyTree.API.Responses;
 
 namespace FamilyTree.API.Services
 {
@@ -13,7 +14,7 @@ namespace FamilyTree.API.Services
 
         // Todo Сделать валидацию входных данных везде и обработку ошибок
 
-        public async Task AddPersonAsync(RequestAddPersonDTO requestAddPersonDTO)
+        public async Task<ApiResponse<Person>> AddPersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
             var person = new Person()
             {
@@ -28,9 +29,11 @@ namespace FamilyTree.API.Services
             };
 
             await _repository.AddPersonAsync(person);
+
+            return ApiResponse<Person>.Ok(person, "Человек успешно добавлен");
         }
 
-        public async Task UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
+        public async Task<ApiResponse<Person>> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
         {
             var personFromDB = await _repository.GetPersonByIdAsync(id);
 
@@ -48,27 +51,34 @@ namespace FamilyTree.API.Services
             };
 
             await _repository.UpdatePersonAsync(updatePerson);
+
+            return ApiResponse<Person>.Ok(updatePerson, "Информация о человеке успешно обновлена");
         }
 
-        public async Task<List<Person>> GetAllPersonAsync()
+        public async Task<ApiResponse<List<Person>>> GetAllPersonAsync()
         {
             List<Person> persons = await _repository.GetAllPersonAsync();
-            return persons;
+            
+            return ApiResponse<List<Person>>.Ok(persons, "");
         }
-        public async Task<PersonDTO?> GetPersonByIdAsync(Guid id)
+        public async Task<ApiResponse<PersonDTO?>> GetPersonByIdAsync(Guid id)
         {
             Person? person = await _repository.GetPersonByIdAsync(id);
 
-            return await PersonMapper.MapToPersonDTO(person, _repository.GetPersonByIdAsync!);
+            var personDto = await PersonMapper.MapToPersonDTO(person!, _repository.GetPersonByIdAsync!);
+
+            return ApiResponse<PersonDTO?>.Ok(personDto, "");
         }
         public async Task SetParentAsync(Guid childId, RequestSetParentDTO requestSetParentDTO)
         {
             await _repository.SetParentAsync(childId, requestSetParentDTO.ParentId, requestSetParentDTO.ParentRelation);
         }
 
-        public async Task DeletePersonAsync(Guid id)
+        public async Task<ApiResponse<object>> DeletePersonAsync(Guid id)
         {
             await _repository.DeletePersonAsync(id);
+
+            return ApiResponse<object>.Ok(null, "Человек успешно удален");
         }
     }
 }

@@ -13,24 +13,28 @@ app.MapGet("/ft/api/persons", async (IPersonService service) =>
 {
     var result = await service.GetAllPersonAsync();
 
-    Results.Ok(result);
+    return Results.Ok(result);
 });
 
 app.MapGet("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
 {
     var result = await service.GetPersonByIdAsync(id);
 
-    Results.Ok(result);
+    return Results.Ok(result);
 });
 
 app.MapPost("/ft/api/persons", async (IPersonService service, RequestAddPersonDTO data) =>
 {
-    await service.AddPersonAsync(data);
+    var result = await service.AddPersonAsync(data);
+
+    return Results.Ok(result);
 });
 
 app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, Guid id, RequestUpdatePersonDTO data) =>
 {
-    await service.UpdatePersonAsync(id, data);
+    var result = await service.UpdatePersonAsync(id, data);
+
+    return Results.Ok(result);
 });
 
 app.MapPost("/ft/api/persons/{childId}/setParent", async (IPersonService service, Guid childId, RequestSetParentDTO data) =>
@@ -40,7 +44,9 @@ app.MapPost("/ft/api/persons/{childId}/setParent", async (IPersonService service
 
 app.MapDelete("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
 {
-    await service.DeletePersonAsync(id);
+    var result = await service.DeletePersonAsync(id);
+
+    return Results.Ok(result);
 });
 
 app.Run();
