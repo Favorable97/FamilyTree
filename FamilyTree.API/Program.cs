@@ -37,11 +37,6 @@ app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, Guid id, Req
     return Results.Ok(result);
 });
 
-app.MapPost("/ft/api/persons/{childId}/setParent", async (IPersonService service, Guid childId, RequestSetParentDTO data) =>
-{
-    await service.SetParentAsync(childId, data);
-});
-
 app.MapDelete("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
 {
     var result = await service.DeletePersonAsync(id);

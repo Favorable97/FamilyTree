@@ -69,11 +69,6 @@ namespace FamilyTree.API.Services
 
             return ApiResponse<PersonDTO?>.Ok(personDto, "");
         }
-        public async Task SetParentAsync(Guid childId, RequestSetParentDTO requestSetParentDTO)
-        {
-            await _repository.SetParentAsync(childId, requestSetParentDTO.ParentId, requestSetParentDTO.ParentRelation);
-        }
-
         public async Task<ApiResponse<object>> DeletePersonAsync(Guid id)
         {
             await _repository.DeletePersonAsync(id);

@@ -71,19 +71,5 @@ namespace FamilyTree.Data.Repositories
 
             await _context.ExecuteCommandAsync(sql, parameters);
         }
-
-        public async Task SetParentAsync(Guid childId, Guid parentId, ParentRelation parentRelation)
-        {
-            string relation = parentRelation == ParentRelation.Mother ? "MotherId" : "FatherId";
-            string sql = $"UPDATE Person SET {relation} = @ParentId WHERE ID = @Id";
-
-            DBParameter[] parameters =
-            [
-                DBParameter.Create("@ParentId", parentId),
-                DBParameter.Create("@Id", childId)
-            ];
-
-            await _context.ExecuteCommandAsync(sql, parameters);
-        }
     }
 }

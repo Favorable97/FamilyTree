@@ -51,7 +51,5 @@ namespace FamilyTree.Data.Interfaces
         /// <param name="parentId">Идентификатор родителя</param>
         /// <param name="parentRelation">Тип связи</param>
         /// <returns></returns>
-        
-        public Task SetParentAsync(Guid childId, Guid parentId, ParentRelation parentRelation);
     }
 }
