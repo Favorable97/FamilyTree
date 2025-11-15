@@ -1,9 +1,9 @@
 ﻿namespace FamilyTree.API.DTO
 {
     /// <summary>
-    /// DTO для передачи информации о человеке и его родителях
+    /// Краткий DTO для передачи информации о человеке и его родителях в карточку персоны
     /// </summary>
-    public record PersonDTO
+    public record ShortPersonDTO
     {
         /// <summary>
         /// Уникальный идентификатор
@@ -29,17 +29,5 @@
         /// Дата смерти
         /// </summary>
         public DateTime? DeathDate { get; init; }
-        /// <summary>
-        /// Пол
-        /// </summary>
-        public Gender Gender { get; init; }
-        /// <summary>
-        /// Сссылка на маму человека
-        /// </summary>
-        public ShortPersonDTO? Mother { get; init; }
-        /// <summary>
-        /// Ссылка на отца человека
-        /// </summary>
-        public ShortPersonDTO? Father { get; init; }
     }
 }

@@ -65,7 +65,16 @@ namespace FamilyTree.API.Services
         {
             Person? person = await _repository.GetPersonByIdAsync(id);
 
-            var personDto = await PersonMapper.MapToPersonDTO(person!, _repository.GetPersonByIdAsync!);
+            var motherTask = person.MotherID == null
+                ? Task.FromResult<Person?>(null)
+                : _repository.GetPersonByIdAsync(person.MotherID.Value);
+            var fatherTask = person.FatherID == null
+                ? Task.FromResult<Person?>(null)
+                : _repository.GetPersonByIdAsync(person.FatherID.Value);
+
+            await Task.WhenAll(motherTask, fatherTask);
+
+            var personDto = PersonMapper.MapToPersonDTO(person, motherTask.Result, fatherTask.Result);
 
             return ApiResponse<PersonDTO?>.Ok(personDto, "");
         }

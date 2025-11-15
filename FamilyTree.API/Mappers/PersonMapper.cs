@@ -2,54 +2,42 @@
 {
     public static class PersonMapper
     {
-        public async static Task<PersonDTO> MapToPersonDTO(Person person, Func<Guid, Task<Person>?> getPersonById)
+        /// <summary>
+        /// Преобразуем из объектов Person в объект PersonDTO
+        /// </summary>
+        /// <param name="person">Персона, которую искали</param>
+        /// <param name="mother">Объект матери</param>
+        /// <param name="father">Объект отца</param>
+        /// <returns></returns>
+        public static PersonDTO MapToPersonDTO(Person person, Person? mother, Person? father) => new PersonDTO()
         {
-            PersonDTO motherDTO = null,
-                fatherDTO = null;
+            Id = person.Id,
+            LastName = person.LastName,
+            FirstName = person.FirstName,
+            MiddleName = person.MiddleName,
+            BirthDate = person.BirthDate,
+            DeathDate = person.DeathDate,
+            Gender = person.Gender,
 
-            if (person.MotherID.HasValue)
+            Mother = mother == null ? null : new ShortPersonDTO()
             {
-                var mother = await getPersonById(person.MotherID.Value);
+                Id = mother.Id,
+                LastName = mother.LastName,
+                FirstName = mother.FirstName,
+                MiddleName = mother.MiddleName,
+                BirthDate = mother.BirthDate,
+                DeathDate = mother.DeathDate
+            },
 
-                if (mother is not null)
-                {
-                    motherDTO = Map(mother);
-                }
+            Father = father == null ? null : new ShortPersonDTO()
+            {
+                Id = father.Id,
+                LastName = father.LastName,
+                FirstName = father.FirstName,
+                MiddleName = father.MiddleName,
+                BirthDate = father.BirthDate,
+                DeathDate = father.DeathDate
             }
-
-            if (person.FatherID.HasValue)
-            {
-                var father = await getPersonById(person.FatherID.Value);
-
-                if (father is not null)
-                {
-                    fatherDTO = Map(father);
-                }
-            }
-
-            return new()
-            {
-                Id = person.Id,
-                LastName = person.LastName,
-                FirstName = person.FirstName,
-                MiddleName = person.MiddleName,
-                BirthDate = person.BirthDate,
-                DeathDate = person.DeathDate,
-                Gender = person.Gender,
-                Mother = motherDTO ?? null,
-                Father = fatherDTO ?? null
-            };
-
-            static PersonDTO Map(Person person) => new()
-            {
-                Id = person.Id,
-                LastName = person.LastName,
-                FirstName = person.FirstName,
-                MiddleName = person.MiddleName,
-                BirthDate = person.BirthDate,
-                DeathDate = person.DeathDate,
-                Gender = person.Gender
-            };
-        }
+        };
     }
 }
