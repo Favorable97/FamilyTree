@@ -8,7 +8,7 @@ using Microsoft.Data.SqlClient;
 
 namespace FamilyTree.Data.Context
 {
-    public class FamilyTreeContext(string connectionString) : IDisposable
+    public class FamilyTreeContext(string connectionString) : IAsyncDisposable
     {
         private readonly string _connectionString = connectionString;
         private SqlConnection? _connection;
@@ -45,19 +45,21 @@ namespace FamilyTree.Data.Context
             foreach (var parameter in parameters)
                 command.Parameters.AddWithValue(parameter.Name, parameter.Value);
 
-            using var adapter = new SqlDataAdapter(command);
-
+            using var reader = await command.ExecuteReaderAsync();
             var resultTable = new DataTable();
-
-            adapter.Fill(resultTable);
+            resultTable.Load(reader); // этот метод синхронный, но не блокирует БД. Только копирование данных
 
             return resultTable;
         }
 
-        public async void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            await _connection.CloseAsync();
-            await _connection.DisposeAsync();
+            if (_connection != null)
+            {
+                await _connection.CloseAsync();
+                await _connection.DisposeAsync();
+                _connection = null;
+            }
             GC.SuppressFinalize(this);
         }
     }
