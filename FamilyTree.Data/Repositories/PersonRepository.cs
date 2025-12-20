@@ -13,7 +13,7 @@ namespace FamilyTree.Data.Repositories
         // Todo сделать обработку ошибок
 
         private readonly FamilyTreeContext _context = context;
-        public async Task AddPersonAsync(Person person)
+        public async Task CreatePersonAsync(Person person)
         {
             string sql =
                 @"INSERT INTO Person (Id, LastName, FirstName, MiddleName, BirthDate, DeathDate, Gender, MotherId, FatherId) 

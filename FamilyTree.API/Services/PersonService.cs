@@ -12,9 +12,12 @@ namespace FamilyTree.API.Services
     {
         private readonly IPersonRepository _repository = repository;
 
-        // Todo Сделать валидацию входных данных везде и обработку ошибок
-
-        public async Task<ApiResponse<Person>> AddPersonAsync(RequestAddPersonDTO requestAddPersonDTO)
+        /// <summary>
+        /// Сервис по добавлению человека
+        /// </summary>
+        /// <param name="requestAddPersonDTO">Объект данных о человеке</param>
+        /// <returns></returns>
+        public async Task<ApiResponse<Person>> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
             var person = new Person()
             {
@@ -28,11 +31,17 @@ namespace FamilyTree.API.Services
                 FatherID = requestAddPersonDTO.FatherID
             };
 
-            await _repository.AddPersonAsync(person);
+            await _repository.CreatePersonAsync(person);
 
             return ApiResponse<Person>.Ok(person, "Человек успешно добавлен");
         }
 
+        /// <summary>
+        /// Сервис по изменению информации о человеке
+        /// </summary>
+        /// <param name="id">Id человека</param>
+        /// <param name="requestUpdatePersonDTO">Информация для изменения</param>
+        /// <returns></returns>
         public async Task<ApiResponse<Person>> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
         {
             var personFromDB = await _repository.GetPersonByIdAsync(id);
@@ -55,12 +64,22 @@ namespace FamilyTree.API.Services
             return ApiResponse<Person>.Ok(updatePerson, "Информация о человеке успешно обновлена");
         }
 
+        /// <summary>
+        /// Получение списка всех людей в системе
+        /// </summary>
+        /// <returns></returns>
         public async Task<ApiResponse<List<Person>>> GetAllPersonAsync()
         {
             List<Person> persons = await _repository.GetAllPersonAsync();
             
             return ApiResponse<List<Person>>.Ok(persons, "");
         }
+
+        /// <summary>
+        /// Получение человека по Id
+        /// </summary>
+        /// <param name="id">Id человека</param>
+        /// <returns></returns>
         public async Task<ApiResponse<PersonDTO?>> GetPersonByIdAsync(Guid id)
         {
             Person? person = await _repository.GetPersonByIdAsync(id);

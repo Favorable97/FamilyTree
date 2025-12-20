@@ -29,7 +29,7 @@ namespace FamilyTree.Data.Interfaces
         /// <param name="person">Добавляемая информация о человеке</param>
         /// <returns></returns>
         
-        public Task AddPersonAsync(Person person);
+        public Task CreatePersonAsync(Person person);
         /// <summary>
         /// Обновление информации о человеке
         /// </summary>
