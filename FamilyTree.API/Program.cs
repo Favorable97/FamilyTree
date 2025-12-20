@@ -1,5 +1,7 @@
 using FamilyTree.API;
 using FamilyTree.API.Middleware;
+using FamilyTree.API.Validators;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,7 @@ builder.AddStartServices();
 var app = builder.Build();
 
 app.ExceptionMiddleware();
+
 
 app.MapGet("/ft/api/persons", async (IPersonService service) =>
 {
@@ -18,20 +21,36 @@ app.MapGet("/ft/api/persons", async (IPersonService service) =>
 
 app.MapGet("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
 {
+    if (id == Guid.Empty)
+        return Results.BadRequest("”казан некорректный идентификатор персоны!");
+
     var result = await service.GetPersonByIdAsync(id);
 
     return result.Success ? Results.Ok(result) : Results.NotFound(result);
 });
 
-app.MapPost("/ft/api/persons", async (IPersonService service, RequestAddPersonDTO data) =>
+app.MapPost("/ft/api/persons", async (IPersonService service, IValidator<RequestAddPersonDTO> validator, RequestAddPersonDTO data) =>
 {
+    var validate = await validator.ValidateAsync(data);
+
+    if (!validate.IsValid)
+        Results.BadRequest(validate.Errors);
+
     var result = await service.AddPersonAsync(data);
 
     return result.Success ? Results.Created($"/ft/api/persons/{result.Data!.Id}", result) : Results.BadRequest(result);
 });
 
-app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, Guid id, RequestUpdatePersonDTO data) =>
+app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, IValidator<RequestUpdatePersonDTO> validator, Guid id, RequestUpdatePersonDTO data) =>
 {
+    if (id == Guid.Empty)
+        return Results.BadRequest("”казан некорректный идентификатор персоны!");
+
+    var validate = await validator.ValidateAsync(data);
+
+    if (!validate.IsValid)
+        Results.BadRequest(validate.Errors);
+
     var result = await service.UpdatePersonAsync(id, data);
 
     return result.Success ? Results.Ok(result) : Results.NotFound(result);
