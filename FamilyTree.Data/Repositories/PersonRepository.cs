@@ -10,9 +10,8 @@ namespace FamilyTree.Data.Repositories
 {
     public class PersonRepository(FamilyTreeContext context) : IPersonRepository
     {
-        // Todo сделать обработку ошибок
-
         private readonly FamilyTreeContext _context = context;
+
         public async Task CreatePersonAsync(Person person)
         {
             string sql =
@@ -53,6 +52,30 @@ namespace FamilyTree.Data.Repositories
             return ConvertData.ConvertToListPerson(result).FirstOrDefault();
         }
 
+        public async Task<bool> ExistsAsync(
+            string lastName,
+            string firstName,
+            string? middleName,
+            DateTime dateBirthday)
+        {
+            string sql = @"
+                SELECT 1 
+                FROM Person 
+                WHERE LastName = @LastName AND FirstName = @FirstName AND ISNULL(@MiddleName, '') = ISNULL(MiddleName, '') AND @DateBirthday = DateBirthdate";
+
+            DBParameter[] parameters =
+            [
+                DBParameter.Create("@LastName", lastName),
+                DBParameter.Create("@FirstName", firstName),
+                DBParameter.Create("@MiddleName", middleName),
+                DBParameter.Create("@DateBirthday", dateBirthday)
+            ];
+
+            var result = await _context.ExecuteScalarAsync(sql, parameters);
+
+            return result != null;
+        }
+
         public async Task UpdatePersonAsync(Person person)
         {
             string sql = @"
@@ -70,6 +93,17 @@ namespace FamilyTree.Data.Repositories
             var parameters = ParametersParseSQLString.GetParamsFromCommand(sql, person);
 
             await _context.ExecuteCommandAsync(sql, parameters);
+        }
+
+        public async Task<bool> IsParentAsync(Guid id)
+        {
+            string sql = "SELECT 1 FROM Person WHERE @ID IN (FatherID, MotherID)";
+
+            DBParameter parameter = DBParameter.Create("@ID", id);
+
+            var result = await _context.ExecuteScalarAsync(sql, parameter);
+
+            return result != null;
         }
     }
 }

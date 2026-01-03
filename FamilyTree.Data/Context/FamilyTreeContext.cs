@@ -52,6 +52,18 @@ namespace FamilyTree.Data.Context
             return resultTable;
         }
 
+        public async Task<object?> ExecuteScalarAsync(string sqlCommand, params DBParameter[] parameters)
+        {
+            var connection = await GetOpenConnection();
+
+            using var command = new SqlCommand(sqlCommand, connection);
+
+            foreach (var parameter in parameters)
+                command.Parameters.AddWithValue(parameter.Name, parameter.Value);
+
+            return await command.ExecuteScalarAsync();
+        }
+
         public async ValueTask DisposeAsync()
         {
             if (_connection != null)

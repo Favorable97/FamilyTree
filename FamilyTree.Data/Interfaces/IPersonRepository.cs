@@ -51,5 +51,18 @@ namespace FamilyTree.Data.Interfaces
         /// <param name="parentId">Идентификатор родителя</param>
         /// <param name="parentRelation">Тип связи</param>
         /// <returns></returns>
+
+        public Task<bool> ExistsAsync(
+            string lastName,
+            string firstName,
+            string? middleName,
+            DateTime dateBirthday);
+
+        /// <summary>
+        /// Является ли человек родителем
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Task<bool> IsParentAsync(Guid id);
     }
 }
