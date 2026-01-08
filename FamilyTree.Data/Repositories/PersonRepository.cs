@@ -76,6 +76,17 @@ namespace FamilyTree.Data.Repositories
             return result != null;
         }
 
+        public async Task<bool> ExistsByIdAsync(Guid id)
+        {
+            string sql = "SELECT 1 FROM Person WHERE Id = @ID";
+
+            DBParameter parameter = DBParameter.Create("@ID", id);
+
+            var result = await _context.ExecuteScalarAsync(sql, parameter);
+
+            return result != null;
+        }
+
         public async Task UpdatePersonAsync(Person person)
         {
             string sql = @"
@@ -104,6 +115,25 @@ namespace FamilyTree.Data.Repositories
             var result = await _context.ExecuteScalarAsync(sql, parameter);
 
             return result != null;
+        }
+
+        public async Task<List<Person>> GetChildrenAsync(Guid id)
+        {
+            string sql = @"
+                SELECT [Id]
+                      ,[LastName]
+                      ,[FirstName]
+                      ,[MiddleName]
+                      ,[BirthDate]
+                      ,[DeathDate]
+                FROM [FamilyTree].[dbo].[Person]
+                WHERE @ParentID IN (MotherID, FatherID)";
+
+            DBParameter parameter = DBParameter.Create("@ParentID", id);
+
+            var result = await _context.QueryAsync(sql, parameter);
+
+            return ConvertData.ConvertToListPerson(result);
         }
     }
 }

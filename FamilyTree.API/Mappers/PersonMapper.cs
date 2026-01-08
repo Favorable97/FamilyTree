@@ -39,5 +39,15 @@
                 DeathDate = father.DeathDate
             }
         };
+
+        public static ShortPersonDTO MapToShortPersonDTO(Person person) => new()
+        {
+            Id = person.Id,
+            LastName = person.LastName,
+            FirstName = person.FirstName,
+            MiddleName = person.MiddleName,
+            BirthDate = person.BirthDate,
+            DeathDate = person.DeathDate
+        };
     }
 }
