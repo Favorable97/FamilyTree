@@ -90,18 +90,19 @@ namespace FamilyTree.API.Services
         /// <returns></returns>
         public async Task<ApiResponse<PersonDTO?>> GetPersonByIdAsync(Guid id)
         {
-            Person? person = await _repository.GetPersonByIdAsync(id);
+            Person? person = await _repository.GetPersonByIdAsync(id) ?? throw new Exception($"Персона с Id = {id} не найдена!");
 
-            var motherTask = person.MotherID == null
-                ? Task.FromResult<Person?>(null)
-                : _repository.GetPersonByIdAsync(person.MotherID.Value);
-            var fatherTask = person.FatherID == null
-                ? Task.FromResult<Person?>(null)
-                : _repository.GetPersonByIdAsync(person.FatherID.Value);
+            var mother = person.MotherID == null
+                ? null
+                : await _repository.GetPersonByIdAsync(person.MotherID.Value);
 
-            await Task.WhenAll(motherTask, fatherTask);
+            var father = person.FatherID == null
+                ? null
+                : await _repository.GetPersonByIdAsync(person.FatherID.Value);
 
-            var personDto = PersonMapper.MapToPersonDTO(person, motherTask.Result, fatherTask.Result);
+            //await Task.WhenAll(motherTask, fatherTask);
+
+            var personDto = PersonMapper.MapToPersonDTO(person, mother, father);
 
             return ApiResponse<PersonDTO?>.Ok(personDto, "");
         }

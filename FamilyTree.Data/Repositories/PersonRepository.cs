@@ -61,14 +61,14 @@ namespace FamilyTree.Data.Repositories
             string sql = @"
                 SELECT 1 
                 FROM Person 
-                WHERE LastName = @LastName AND FirstName = @FirstName AND ISNULL(@MiddleName, '') = ISNULL(MiddleName, '') AND @DateBirthday = DateBirthdate";
+                WHERE LastName = @LastName AND FirstName = @FirstName AND ISNULL(@MiddleName, '') = ISNULL(MiddleName, '') AND @BirthDate = BirthDate";
 
             DBParameter[] parameters =
             [
                 DBParameter.Create("@LastName", lastName),
                 DBParameter.Create("@FirstName", firstName),
                 DBParameter.Create("@MiddleName", middleName),
-                DBParameter.Create("@DateBirthday", dateBirthday)
+                DBParameter.Create("@BirthDate", dateBirthday)
             ];
 
             var result = await _context.ExecuteScalarAsync(sql, parameters);

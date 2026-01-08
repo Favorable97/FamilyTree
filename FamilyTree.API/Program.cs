@@ -1,5 +1,6 @@
 using FamilyTree.API;
 using FamilyTree.API.Middleware;
+using FamilyTree.API.Responses;
 using FamilyTree.API.Validators;
 using FluentValidation;
 
@@ -34,9 +35,9 @@ app.MapPost("/ft/api/persons", async (IPersonService service, IValidator<Request
     var validate = await validator.ValidateAsync(data);
 
     if (!validate.IsValid)
-        Results.BadRequest(validate.Errors);
+        return Results.BadRequest(ApiResponse<object>.Error(string.Join("; ", validate.Errors.Select(message => message.ErrorMessage))));
 
-    var result = await service.AddPersonAsync(data);
+    var result = await service.CreatePersonAsync(data);
 
     return result.Success ? Results.Created($"/ft/api/persons/{result.Data!.Id}", result) : Results.BadRequest(result);
 });
@@ -49,7 +50,7 @@ app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, IValidator<R
     var validate = await validator.ValidateAsync(data);
 
     if (!validate.IsValid)
-        Results.BadRequest(validate.Errors);
+        return Results.BadRequest(ApiResponse<object>.Error(string.Join("; ", validate.Errors.Select(message => message.ErrorMessage))));
 
     var result = await service.UpdatePersonAsync(id, data);
 
@@ -61,6 +62,17 @@ app.MapDelete("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
     var result = await service.DeletePersonAsync(id);
 
     return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+});
+
+app.MapGet("/ft/api/test/{personId}", async (IFamilyTreeService service, Guid personId, int maxDepth) =>
+{
+    var result1 = await service.GetParentsAsync(personId);
+
+    var result2 = await service.GetChildrenAsync(personId);
+
+    var result5 = await service.GetAncestorsAsync(personId, maxDepth);
+
+    var result6 = await service.GetDescendantsAsync(personId, maxDepth);
 });
 
 app.Run();

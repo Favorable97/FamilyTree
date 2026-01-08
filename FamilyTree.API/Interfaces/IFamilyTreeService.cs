@@ -17,20 +17,6 @@
         public Task<List<ShortPersonDTO>> GetChildrenAsync(Guid personId);
 
         /// <summary>
-        /// Поиск бабушек/дедушек на 1 уровень
-        /// </summary>
-        /// <param name="personId">Персона, у которой ищем бабушек/дедушек, то есть внук/внучка</param>
-        /// <returns></returns>
-        public Task<List<ShortPersonDTO>> GetGrandParentsAsync(Guid personId);
-
-        /// <summary>
-        /// Поиск внуков/внучен на 1 уровень
-        /// </summary>
-        /// <param name="personId">Персона, у которой ищем внуков/внучек, то есть бабушка/дедушка</param>
-        /// <returns></returns>
-        public Task<List<ShortPersonDTO>> GetGrandChildrenAsync(Guid personId);
-
-        /// <summary>
         /// Получаем всех предков по Id человека
         /// </summary>
         /// <param name="personId">Персона, у которой ищем всех предков</param>

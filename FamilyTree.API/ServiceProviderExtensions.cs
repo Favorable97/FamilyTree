@@ -15,6 +15,8 @@ namespace FamilyTree.API
             builder.Services.AddScoped<FamilyTreeContext>(_ => new FamilyTreeContext(builder.Configuration.GetConnectionString("mssql")!));
 
             builder.Services.AddScoped<IPersonService, PersonService>();
+
+            builder.Services.AddScoped<IFamilyTreeService, FamilyTreeService>();
             
             builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 

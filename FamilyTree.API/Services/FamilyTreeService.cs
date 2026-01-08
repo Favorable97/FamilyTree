@@ -37,54 +37,6 @@ namespace FamilyTree.API.Services
             return children;
         }
 
-        public async Task<List<ShortPersonDTO>> GetGrandParentsAsync(Guid personId)
-        {
-            var person = await _repository.GetPersonByIdAsync(personId) ?? throw new Exception($"Человек с Id: {personId} не найден!");
-
-            List<ShortPersonDTO> grandParents = [];
-
-            if (person.MotherID != null)
-            {
-                var parentsMother = await GetParentsAsync(person.MotherID.Value);
-                
-                if (parentsMother.Mother != null)
-                    grandParents.Add(parentsMother.Mother);
-
-                if (parentsMother.Father != null)
-                    grandParents.Add(parentsMother.Father);
-            }
-
-            if (person.FatherID != null)
-            {
-                var parentsFather = await GetParentsAsync(person.FatherID.Value);
-
-                if (parentsFather.Mother != null)
-                    grandParents.Add(parentsFather.Mother);
-
-                if (parentsFather.Father != null)
-                    grandParents.Add(parentsFather.Father);
-            }
-
-            return grandParents;
-        }
-
-        public async Task<List<ShortPersonDTO>> GetGrandChildrenAsync(Guid personId)
-        {
-            var children = await GetChildrenAsync(personId);
-
-            List<ShortPersonDTO> grandChildren = [];
-
-            foreach (var child in children)
-            {
-                var grandChild = await GetChildrenAsync(child.Id);
-
-                if (grandChild.Count > 0)
-                    grandChildren.AddRange(grandChild);
-            }
-
-            return grandChildren;
-        }
-
         public async Task<List<ShortPersonDTO>> GetAncestorsAsync(Guid personId, int maxDepth = 0)
         {
             // список предков
