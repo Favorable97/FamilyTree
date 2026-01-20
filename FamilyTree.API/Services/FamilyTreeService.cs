@@ -1,6 +1,8 @@
 ﻿
 using FamilyTree.API.Mappers;
 using FamilyTree.Data.Interfaces;
+using Microsoft.AspNetCore.Components.Forms;
+using System.ComponentModel;
 
 namespace FamilyTree.API.Services
 {
@@ -154,6 +156,78 @@ namespace FamilyTree.API.Services
             }
 
             return descendantsList;
+        }
+
+        public async Task<PersonTreeNodeDTO> GetPersonTreeAsync(Guid personId, int maxDepthParents, int maxDepthChildren)
+        {
+            var root = await CreateNode(personId);
+
+            HashSet<Guid> visited = [];
+
+            await BuildParents(root, maxDepthParents, visited);
+
+            visited.Clear();
+
+            await BuildChildren(root, maxDepthChildren, visited);
+
+            return root;
+        }
+
+        private async Task<PersonTreeNodeDTO> CreateNode(Guid personId)
+        {
+            var person = await _repository.GetPersonByIdAsync(personId);
+
+            PersonTreeNodeDTO root = new()
+            {
+                Person = PersonMapper.MapToShortPersonDTO(person!),
+                Parents = [],
+                Children = []
+            };
+
+            return root;
+        }
+
+        private async Task BuildParents(PersonTreeNodeDTO node, int depth, HashSet<Guid> visited)
+        {
+            if (depth == 0 || !visited.Add(node.Person.Id))
+                return;
+
+            var (Mother, Father) = await GetParentsAsync(node.Person.Id);
+
+            if (Mother != null)
+            {
+                PersonTreeNodeDTO mother = await CreateNode(Mother.Id);
+                
+                node.Parents.Add(mother);
+
+                await BuildParents(mother, depth - 1, visited);
+            }
+
+            if (Father != null)
+            {
+                PersonTreeNodeDTO father = await CreateNode(Father.Id);
+
+                node.Parents.Add(father);
+
+                await BuildParents(father, depth - 1, visited);
+            }
+        }
+
+        private async Task BuildChildren(PersonTreeNodeDTO node, int depth, HashSet<Guid> visited)
+        {
+            if (depth == 0 || !visited.Add(node.Person.Id))
+                return;
+
+            var childrenList = await GetChildrenAsync(node.Person.Id);
+
+            foreach (var child in childrenList)
+            {
+                var childNode = await CreateNode(child.Id);
+
+                node.Children.Add(childNode);
+
+                await BuildChildren(childNode, depth - 1, visited);
+            }
         }
     }
 }
