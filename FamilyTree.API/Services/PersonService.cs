@@ -19,7 +19,7 @@ namespace FamilyTree.API.Services
         /// </summary>
         /// <param name="requestAddPersonDTO">Объект данных о человеке</param>
         /// <returns></returns>
-        public async Task<ApiResponse<Person>> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
+        public async Task<Person> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
             await СheckExistsPerson(requestAddPersonDTO.LastName, requestAddPersonDTO.FirstName, requestAddPersonDTO.MiddleName, requestAddPersonDTO.BirthDate);
 
@@ -39,7 +39,7 @@ namespace FamilyTree.API.Services
 
             await _repository.CreatePersonAsync(person);
 
-            return ApiResponse<Person>.Ok(person, "Человек успешно добавлен");
+            return person;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace FamilyTree.API.Services
         /// <param name="id">Id человека</param>
         /// <param name="requestUpdatePersonDTO">Информация для изменения</param>
         /// <returns></returns>
-        public async Task<ApiResponse<Person>> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
+        public async Task<Person> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
         {
             var personFromDB = await _repository.GetPersonByIdAsync(id) ?? throw new Exception($"Человек с Id: {id} не найден");
 
@@ -69,18 +69,18 @@ namespace FamilyTree.API.Services
 
             await _repository.UpdatePersonAsync(updatePerson);
 
-            return ApiResponse<Person>.Ok(updatePerson, "Информация о человеке успешно обновлена");
+            return updatePerson;
         }
 
         /// <summary>
         /// Получение списка всех людей в системе
         /// </summary>
         /// <returns></returns>
-        public async Task<ApiResponse<List<Person>>> GetAllPersonAsync()
+        public async Task<List<Person>> GetAllPersonAsync()
         {
             List<Person> persons = await _repository.GetAllPersonAsync();
             
-            return ApiResponse<List<Person>>.Ok(persons, "");
+            return persons;
         }
 
         /// <summary>
@@ -88,9 +88,12 @@ namespace FamilyTree.API.Services
         /// </summary>
         /// <param name="id">Id человека</param>
         /// <returns></returns>
-        public async Task<ApiResponse<PersonDTO?>> GetPersonByIdAsync(Guid id)
+        public async Task<PersonDTO?> GetPersonByIdAsync(Guid id)
         {
-            Person? person = await _repository.GetPersonByIdAsync(id) ?? throw new Exception($"Персона с Id = {id} не найдена!");
+            Person? person = await _repository.GetPersonByIdAsync(id);
+
+            if (person is null)
+                return null;
 
             var mother = person.MotherID == null
                 ? null
@@ -100,11 +103,9 @@ namespace FamilyTree.API.Services
                 ? null
                 : await _repository.GetPersonByIdAsync(person.FatherID.Value);
 
-            //await Task.WhenAll(motherTask, fatherTask);
+            var personDTO = PersonMapper.MapToPersonDTO(person, mother, father);
 
-            var personDto = PersonMapper.MapToPersonDTO(person, mother, father);
-
-            return ApiResponse<PersonDTO?>.Ok(personDto, "");
+            return personDTO;
         }
         
         /// <summary>
@@ -113,15 +114,13 @@ namespace FamilyTree.API.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<ApiResponse<object>> DeletePersonAsync(Guid id)
+        public async Task DeletePersonAsync(Guid id)
         {
             var person = await _repository.GetPersonByIdAsync(id) ?? throw new Exception($"Человек с Id: {id} не найден!");
 
             await IsParentPerson(id);
 
             await _repository.DeletePersonAsync(id);
-
-            return ApiResponse<object>.Ok(null, "Человек успешно удален");
         }
 
         #region Вспомогательные методы

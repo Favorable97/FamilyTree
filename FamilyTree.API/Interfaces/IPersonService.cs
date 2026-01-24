@@ -5,10 +5,10 @@ namespace FamilyTree.API.Interfaces
 {
     public interface IPersonService
     {
-        public Task<ApiResponse<List<Person>>> GetAllPersonAsync();
-        public Task<ApiResponse<PersonDTO?>> GetPersonByIdAsync(Guid id);
-        public Task<ApiResponse<Person>> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO);
-        public Task<ApiResponse<Person>> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO);
-        public Task<ApiResponse<object>> DeletePersonAsync(Guid id);
+        public Task<List<Person>> GetAllPersonAsync();
+        public Task<PersonDTO?> GetPersonByIdAsync(Guid id);
+        public Task<Person> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO);
+        public Task<Person> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO);
+        public Task DeletePersonAsync(Guid id);
     }
 }
