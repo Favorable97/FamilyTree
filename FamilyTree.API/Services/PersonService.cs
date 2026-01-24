@@ -1,4 +1,5 @@
 ﻿using FamilyTree.API.DTO;
+using FamilyTree.API.Errors;
 using FamilyTree.API.Interfaces;
 using FamilyTree.API.Mappers;
 using FamilyTree.API.Responses;
@@ -50,7 +51,7 @@ namespace FamilyTree.API.Services
         /// <returns></returns>
         public async Task<Person> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
         {
-            var personFromDB = await _repository.GetPersonByIdAsync(id) ?? throw new Exception($"Человек с Id: {id} не найден");
+            var personFromDB = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
 
             Person updatePerson = new()
             {
@@ -116,7 +117,7 @@ namespace FamilyTree.API.Services
         /// <exception cref="Exception"></exception>
         public async Task DeletePersonAsync(Guid id)
         {
-            var person = await _repository.GetPersonByIdAsync(id) ?? throw new Exception($"Человек с Id: {id} не найден!");
+            var person = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
 
             await IsParentPerson(id);
 
@@ -129,7 +130,7 @@ namespace FamilyTree.API.Services
             var isExist = await _repository.ExistsAsync(lastName, firstName, middleName, birthDate);
 
             if (isExist)
-                throw new Exception("Попытка повторного добавления персоны!");
+                throw new PersonAlreadyExistsException();
         }
 
         private async Task ParentValidation(Person person)
@@ -137,7 +138,7 @@ namespace FamilyTree.API.Services
             if (person.MotherID.HasValue && person.FatherID.HasValue)
             {
                 if (person.MotherID == person.FatherID)
-                    throw new Exception("Ссылка на мать совпадает с ссылкой на отца!");
+                    throw new InvalidParentException();
             }
 
             if (person.MotherID.HasValue)
@@ -149,30 +150,24 @@ namespace FamilyTree.API.Services
 
         private async Task ValidationMother(Guid motherId, DateTime childBirthDate) 
         { 
-            var mother = await _repository.GetPersonByIdAsync(motherId);
-
-            if (mother == null)
-                throw new Exception("Выбрана несуществующая персона!");
+            var mother = await _repository.GetPersonByIdAsync(motherId) ?? throw new ParentNotFoundException();
 
             if (mother.Gender != Gender.Female)
-                throw new Exception("Выбранная персона - не женщина и не может быть матерью!");
+                throw new InvalidParentException();
 
             if (mother.BirthDate >= childBirthDate)
-                throw new Exception("Ребенок не может быть старше матери!");
+                throw new InvalidParentException();
         }
 
         private async Task ValidationFather(Guid fatherId, DateTime childBirthDate)
         {
-            var father = await _repository.GetPersonByIdAsync(fatherId);
-
-            if (father == null)
-                throw new Exception("Выбрана несуществующая персона!");
+            var father = await _repository.GetPersonByIdAsync(fatherId) ?? throw new ParentNotFoundException();
 
             if (father.Gender != Gender.Male)
-                throw new Exception("Выбранная персона - не мужчина и не может быть папой!");
+                throw new InvalidParentException();
 
             if (father.BirthDate >= childBirthDate)
-                throw new Exception("Ребенок не может быть старше отца!");
+                throw new InvalidParentException();
         }
 
         private async Task IsParentPerson(Guid id)
@@ -180,7 +175,7 @@ namespace FamilyTree.API.Services
             var isParent = await _repository.IsParentAsync(id);
 
             if (isParent)
-                throw new Exception("Невозможно удалить человека, так как он является родителем!");
+                throw new PersonIsParentException();
         }
 
         #endregion
