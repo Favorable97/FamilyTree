@@ -6,6 +6,7 @@ using FamilyTree.API.Responses;
 using FamilyTree.Data.Interfaces;
 using FamilyTree.Data.Models;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -20,7 +21,7 @@ namespace FamilyTree.API.Services
         /// </summary>
         /// <param name="requestAddPersonDTO">Объект данных о человеке</param>
         /// <returns></returns>
-        public async Task<Person> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
+        public async Task<PersonDTO> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
             await СheckExistsPerson(requestAddPersonDTO.LastName, requestAddPersonDTO.FirstName, requestAddPersonDTO.MiddleName, requestAddPersonDTO.BirthDate);
 
@@ -40,7 +41,11 @@ namespace FamilyTree.API.Services
 
             await _repository.CreatePersonAsync(person);
 
-            return person;
+            var mother = person.MotherID != null ? await _repository.GetPersonByIdAsync(person.MotherID.Value) : null;
+
+            var father = person.FatherID != null ? await _repository.GetPersonByIdAsync(person.FatherID.Value) : null;
+
+            return PersonMapper.MapToPersonDTO(person, mother, father);
         }
 
         /// <summary>
@@ -49,7 +54,7 @@ namespace FamilyTree.API.Services
         /// <param name="id">Id человека</param>
         /// <param name="requestUpdatePersonDTO">Информация для изменения</param>
         /// <returns></returns>
-        public async Task<Person> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
+        public async Task<PersonDTO> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
         {
             var personFromDB = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
 
@@ -70,18 +75,22 @@ namespace FamilyTree.API.Services
 
             await _repository.UpdatePersonAsync(updatePerson);
 
-            return updatePerson;
+            var mother = updatePerson.MotherID != null ? await _repository.GetPersonByIdAsync(updatePerson.MotherID.Value) : null;
+
+            var father = updatePerson.FatherID != null ? await _repository.GetPersonByIdAsync(updatePerson.FatherID.Value) : null;
+
+            return PersonMapper.MapToPersonDTO(updatePerson, mother, father);
         }
 
         /// <summary>
         /// Получение списка всех людей в системе
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Person>> GetAllPersonAsync()
+        public async Task<List<ShortPersonDTO>> GetAllPersonAsync()
         {
             List<Person> persons = await _repository.GetAllPersonAsync();
             
-            return persons;
+            return [.. persons.Select(PersonMapper.MapToShortPersonDTO)];
         }
 
         /// <summary>
@@ -89,12 +98,9 @@ namespace FamilyTree.API.Services
         /// </summary>
         /// <param name="id">Id человека</param>
         /// <returns></returns>
-        public async Task<PersonDTO?> GetPersonByIdAsync(Guid id)
+        public async Task<PersonDTO> GetPersonByIdAsync(Guid id)
         {
-            Person? person = await _repository.GetPersonByIdAsync(id);
-
-            if (person is null)
-                return null;
+            Person? person = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
 
             var mother = person.MotherID == null
                 ? null

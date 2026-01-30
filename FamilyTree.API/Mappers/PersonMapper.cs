@@ -9,7 +9,7 @@
         /// <param name="mother">Объект матери</param>
         /// <param name="father">Объект отца</param>
         /// <returns></returns>
-        public static PersonDTO MapToPersonDTO(Person person, Person? mother, Person? father) => new PersonDTO()
+        public static PersonDTO MapToPersonDTO(Person person, Person? mother, Person? father) => new()
         {
             Id = person.Id,
             LastName = person.LastName,
@@ -19,25 +19,9 @@
             DeathDate = person.DeathDate,
             Gender = person.Gender,
 
-            Mother = mother == null ? null : new ShortPersonDTO()
-            {
-                Id = mother.Id,
-                LastName = mother.LastName,
-                FirstName = mother.FirstName,
-                MiddleName = mother.MiddleName,
-                BirthDate = mother.BirthDate,
-                DeathDate = mother.DeathDate
-            },
+            Mother = mother == null ? null : MapToShortPersonDTO(mother),
 
-            Father = father == null ? null : new ShortPersonDTO()
-            {
-                Id = father.Id,
-                LastName = father.LastName,
-                FirstName = father.FirstName,
-                MiddleName = father.MiddleName,
-                BirthDate = father.BirthDate,
-                DeathDate = father.DeathDate
-            }
+            Father = father == null ? null : MapToShortPersonDTO(father)
         };
 
         public static ShortPersonDTO MapToShortPersonDTO(Person person) => new()
