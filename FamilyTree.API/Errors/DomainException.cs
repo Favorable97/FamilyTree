@@ -1,7 +1,7 @@
 ﻿namespace FamilyTree.API.Errors
 {
-    public abstract class DomainException(ErrorCode errorCode, string message) : Exception(message)
+    public abstract class DomainException(string message) : Exception(message)
     {
-        public ErrorCode ErrorCode { get; } = errorCode;
+        public abstract ErrorCode ErrorCode { get; }
     }
 }

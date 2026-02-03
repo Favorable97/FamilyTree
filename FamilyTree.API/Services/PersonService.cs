@@ -1,7 +1,6 @@
 ﻿using FamilyTree.API.DTO;
 using FamilyTree.API.Errors;
 using FamilyTree.API.Interfaces;
-using FamilyTree.API.Mappers;
 using FamilyTree.API.Responses;
 using FamilyTree.Data.Interfaces;
 using FamilyTree.Data.Models;

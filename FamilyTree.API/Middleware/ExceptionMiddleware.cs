@@ -1,35 +1,35 @@
 ﻿using FamilyTree.API.Errors;
 
+
 namespace FamilyTree.API.Middleware
 {
     public class ExceptionMiddleware(RequestDelegate next)
     {
         private readonly RequestDelegate _next = next;
 
-        public async Task<object?> InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
                 await _next(context);
-
-                return null;
             }
             catch (DomainException de)
             {
-                context.Response.StatusCode = 400;
+                context.Response.StatusCode = ErrorCodeHttpMapper.MapToStatusCode(de.ErrorCode);
+                context.Response.ContentType = "application/json";
 
-                return ApiResponse<object>.Error(de.Message, de.ErrorCode);
+                var response = ApiResponse<object>.Error(de.Message, de.ErrorCode);
+
+                await context.Response.WriteAsJsonAsync(response);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                context.Response.ContentType = "application/json";
 
-                context.Response.StatusCode = 500;
+                var response = ApiResponse<object>.Error("Произошла критическая ошибка", ErrorCode.FatalError);
 
-                return ApiResponse<object>.Error(
-                    "Произошла критическая ошибка!",
-                    ErrorCode.FatalError
-                );
+                await context.Response.WriteAsJsonAsync(response);
             }
         }
     }
