@@ -13,12 +13,27 @@ namespace FamilyTree.API.Middleware
             {
                 await _next(context);
             }
+            catch (FluentValidation.ValidationException ve)
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                context.Response.ContentType = "application/json";
+
+                var errors = ve.Errors.Select(e => new
+                {
+                    Field = e.PropertyName,
+                    Message = e.ErrorMessage
+                });
+
+                var response = ApiResponse<object>.Error("Ошибка валидации входных данных", ErrorCode.ValidationFailed, errors);
+
+                await context.Response.WriteAsJsonAsync(response);
+            }
             catch (DomainException de)
             {
                 context.Response.StatusCode = ErrorCodeHttpMapper.MapToStatusCode(de.ErrorCode);
                 context.Response.ContentType = "application/json";
 
-                var response = ApiResponse<object>.Error(de.Message, de.ErrorCode);
+                var response = ApiResponse<object>.Error("Ошибка бизнесс логики", de.ErrorCode, de.Message);
 
                 await context.Response.WriteAsJsonAsync(response);
             }
@@ -27,7 +42,7 @@ namespace FamilyTree.API.Middleware
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Response.ContentType = "application/json";
 
-                var response = ApiResponse<object>.Error("Произошла критическая ошибка", ErrorCode.FatalError);
+                var response = ApiResponse<object>.Error("Произошла критическая ошибка", ErrorCode.FatalError, ex.Message);
 
                 await context.Response.WriteAsJsonAsync(response);
             }

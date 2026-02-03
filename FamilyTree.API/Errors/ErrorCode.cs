@@ -2,6 +2,8 @@
 {
     public enum ErrorCode
     {
+        ValidationFailed,
+
         PersonNotFound,
         PersonAlreadyExists,
         InvalidParent,

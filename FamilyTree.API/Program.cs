@@ -15,9 +15,11 @@ app.ExceptionMiddleware();
 
 app.MapGet("/ft/api/persons", async (IPersonService service) =>
 {
-    var result = await service.GetAllPersonAsync();
+    var data = await service.GetAllPersonAsync();
 
-    return result.Success ? Results.Ok(result) : Results.NotFound(result);
+    var response = ApiResponse<List<ShortPersonDTO>>.Ok(data, "");
+
+    return data.Count > 0 ? Results.Ok(response) : Results.NotFound(response);
 });
 
 app.MapGet("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
@@ -25,43 +27,49 @@ app.MapGet("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
     if (id == Guid.Empty)
         return Results.BadRequest("Указан некорректный идентификатор персоны!");
 
-    var result = await service.GetPersonByIdAsync(id);
+    var data = await service.GetPersonByIdAsync(id);
 
-    return result.Success ? Results.Ok(result) : Results.NotFound(result);
+    var response = data == null ? ApiResponse<PersonDTO>.Ok(null, "Персона не найдена") : ApiResponse<PersonDTO>.Ok(data, "");
+
+    return data != null ? Results.Ok(response) : Results.NotFound(response);
 });
 
-app.MapPost("/ft/api/persons", async (IPersonService service, IValidator<RequestAddPersonDTO> validator, RequestAddPersonDTO data) =>
+app.MapPost("/ft/api/persons", async (IPersonService service, IValidator<RequestAddPersonDTO> validator, RequestAddPersonDTO dto) =>
 {
-    var validate = await validator.ValidateAsync(data);
+    var validate = await validator.ValidateAsync(dto);
 
     if (!validate.IsValid)
-        return Results.BadRequest(ApiResponse<object>.Error(string.Join("; ", validate.Errors.Select(message => message.ErrorMessage))));
+        throw new FluentValidation.ValidationException(validate.Errors);
 
-    var result = await service.CreatePersonAsync(data);
+    var data = await service.CreatePersonAsync(dto);
 
-    return result.Success ? Results.Created($"/ft/api/persons/{result.Data!.Id}", result) : Results.BadRequest(result);
+    var response = ApiResponse<PersonDTO>.Ok(data, "Персона успешно добавлена");
+
+    return Results.Created($"/ft/api/persons/{data!.Id}", response);
 });
 
-app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, IValidator<RequestUpdatePersonDTO> validator, Guid id, RequestUpdatePersonDTO data) =>
+app.MapPatch("/ft/api/persons/{id}", async (IPersonService service, IValidator<RequestUpdatePersonDTO> validator, Guid id, RequestUpdatePersonDTO dto) =>
 {
     if (id == Guid.Empty)
         return Results.BadRequest("Указан некорректный идентификатор персоны!");
 
-    var validate = await validator.ValidateAsync(data);
+    var validate = await validator.ValidateAsync(dto);
 
     if (!validate.IsValid)
-        return Results.BadRequest(ApiResponse<object>.Error(string.Join("; ", validate.Errors.Select(message => message.ErrorMessage))));
+        throw new FluentValidation.ValidationException(validate.Errors);
 
-    var result = await service.UpdatePersonAsync(id, data);
+    var data = await service.UpdatePersonAsync(id, dto);
 
-    return result.Success ? Results.Ok(result) : Results.NotFound(result);
+    var response = ApiResponse<PersonDTO>.Ok(data, "Персона успешно обновлена!");
+
+    return Results.Ok(response);
 });
 
 app.MapDelete("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
 {
-    var result = await service.DeletePersonAsync(id);
+    await service.DeletePersonAsync(id);
 
-    return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+    return Results.Ok(ApiResponse<object>.Ok(null, "Персона удалена из системы!"));
 });
 
 app.MapGet("/ft/api/test/{personId}", async (IFamilyTreeService service, Guid personId, int maxDepth) =>

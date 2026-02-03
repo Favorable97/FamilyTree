@@ -17,19 +17,12 @@
         public Task<List<ShortPersonDTO>> GetChildrenAsync(Guid personId);
 
         /// <summary>
-        /// Получаем всех предков по Id человека
+        /// Создание дерева из предков и потомков
         /// </summary>
-        /// <param name="personId">Персона, у которой ищем всех предков</param>
-        /// <param name="maxDepth">Максимальная глубина поиска</param>
+        /// <param name="personId">Человек, по которому строится дерево</param>
+        /// <param name="maxDepthParents">Глубина поиска предков</param>
+        /// <param name="maxDepthChildren">Глубина поиска потомков</param>
         /// <returns></returns>
-        public Task<List<ShortPersonDTO>> GetAncestorsAsync(Guid personId, int maxDepth = 0);
-
-        /// <summary>
-        /// Получаем всех потомков по Id человека
-        /// </summary>
-        /// <param name="personId">Персона, у которой ищем всех потомков</param>
-        /// <param name="maxDepth">Максимальная глубина поиска</param>
-        /// <returns></returns>
-        public Task<List<ShortPersonDTO>> GetDescendantsAsync(Guid personId, int maxDepth = 0);
+        public Task<PersonTreeNodeDTO> GetPersonTreeAsync(Guid personId, int maxDepthParents, int maxDepthChildren);
     }
 }
