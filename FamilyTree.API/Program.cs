@@ -3,6 +3,7 @@ using FamilyTree.API.Middleware;
 using FamilyTree.API.Responses;
 using FamilyTree.API.Validators;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,13 +75,13 @@ app.MapDelete("/ft/api/persons/{id}", async (IPersonService service, Guid id) =>
 
 app.MapGet("/ft/api/test/{personId}", async (IFamilyTreeService service, Guid personId, int maxDepth) =>
 {
-    var result1 = await service.GetParentsAsync(personId);
+    //var result1 = await service.GetParentsAsync(personId);
 
-    var result2 = await service.GetChildrenAsync(personId);
+    //var result2 = await service.GetChildrenAsync(personId);
 
-    var result5 = await service.GetAncestorsAsync(personId, maxDepth);
+    var result3 = await service.GetPersonTreeAsync(personId, maxDepth, maxDepth);
 
-    var result6 = await service.GetDescendantsAsync(personId, maxDepth);
+    return Results.Ok(ApiResponse<object>.Ok(result3, "Дерево"));
 });
 
 app.Run();

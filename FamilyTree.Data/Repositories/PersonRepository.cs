@@ -121,13 +121,16 @@ namespace FamilyTree.Data.Repositories
         {
             string sql = @"
                 SELECT [Id]
-                      ,[LastName]
-                      ,[FirstName]
-                      ,[MiddleName]
-                      ,[BirthDate]
-                      ,[DeathDate]
-                FROM [FamilyTree].[dbo].[Person]
-                WHERE @ParentID IN (MotherID, FatherID)";
+                  ,[LastName]
+                  ,[FirstName]
+                  ,[MiddleName]
+                  ,[BirthDate]
+                  ,[DeathDate]
+                  ,[Gender]
+                  ,[MotherId]
+                  ,[FatherId]
+            FROM [FamilyTree].[dbo].[Person]
+            WHERE @ParentID IN (MotherID, FatherID)";
 
             DBParameter parameter = DBParameter.Create("@ParentID", id);
 
