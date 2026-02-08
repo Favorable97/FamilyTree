@@ -4,6 +4,7 @@ using FamilyTree.Data.Context;
 using FamilyTree.Data.Interfaces;
 using FamilyTree.Data.Repositories;
 using FluentValidation;
+using FamilyTree.API.Services;
 
 namespace FamilyTree.API
 {
