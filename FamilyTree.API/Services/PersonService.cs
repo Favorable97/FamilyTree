@@ -157,10 +157,7 @@ namespace FamilyTree.API.Services
         { 
             var mother = await _repository.GetPersonByIdAsync(motherId) ?? throw new ParentNotFoundException();
 
-            if (mother.Gender != Gender.Female)
-                throw new InvalidParentException();
-
-            if (mother.BirthDate >= childBirthDate)
+            if (mother.Gender != Gender.Female || mother.BirthDate >= childBirthDate)
                 throw new InvalidParentException();
         }
 
@@ -168,10 +165,7 @@ namespace FamilyTree.API.Services
         {
             var father = await _repository.GetPersonByIdAsync(fatherId) ?? throw new ParentNotFoundException();
 
-            if (father.Gender != Gender.Male)
-                throw new InvalidParentException();
-
-            if (father.BirthDate >= childBirthDate)
+            if (father.Gender != Gender.Male || father.BirthDate >= childBirthDate)
                 throw new InvalidParentException();
         }
 
