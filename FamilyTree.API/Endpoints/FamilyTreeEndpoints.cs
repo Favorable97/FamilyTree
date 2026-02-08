@@ -4,27 +4,46 @@
     {
         public static IEndpointRouteBuilder MapFamilyTreeEndponts(this IEndpointRouteBuilder builder)
         {
-            var group = builder.MapGroup("/ft/api/relationship");
+            var group = builder.MapGroup("/ft/api/relationship")
+                .WithTags("FamilyTree");
 
 
-            group.MapGet("/parents/{personId}", GetParents);
-            group.MapGet("/children/{personId}", GetChildren);
-            group.MapGet("/tree/{personId}", GetTreePerson);
+            group.MapGet("/parents/{personId}", GetParents)
+                .WithName("GetParentsByPerson")
+                .WithSummary("Получить родителей персоны")
+                .Produces<ApiResponse<List<ShortPersonDTO>>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
+            
+            
+            group.MapGet("/children/{personId}", GetChildren)
+                .WithName("GetChildrenByPerson")
+                .WithSummary("Получить детей персоны")
+                .Produces<ApiResponse<List<ShortPersonDTO>>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
+
+            group.MapGet("/tree/{personId}", GetTreePerson)
+                .WithName("GetTreeByPerson")
+                .WithSummary("Получить дерево по персоне")
+                .Produces<ApiResponse<PersonTreeNodeDTO>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
 
             return builder;
         } 
 
         private async static Task<IResult> GetParents(IFamilyTreeService service, Guid personId)
         {
-            var data = await service.GetParentsAsync(personId);
+            var (Mother, Father) = await service.GetParentsAsync(personId);
 
             List<ShortPersonDTO> parents = [];
 
-            if (data.Mother != null)
-                parents.Add(data.Mother);
+            if (Mother != null)
+                parents.Add(Mother);
 
-            if (data.Father != null)
-                parents.Add(data.Father);
+            if (Father != null)
+                parents.Add(Father);
 
             return parents.Count > 0 ? Results.Ok(ApiResponse<List<ShortPersonDTO>>.Ok(parents, "Родители персоны")) : Results.NoContent();
         }
@@ -40,7 +59,7 @@
         {
             var tree = await service.GetPersonTreeAsync(personId, maxDepth, maxDepth);
 
-            return Results.Ok(ApiResponse<PersonTreeNodeDTO>.Ok(tree, "Дерево"));
+            return tree != null ? Results.Ok(ApiResponse<PersonTreeNodeDTO>.Ok(tree, "Дерево")) : Results.NoContent();
         }
     }
 }

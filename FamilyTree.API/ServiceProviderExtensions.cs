@@ -23,6 +23,10 @@ namespace FamilyTree.API
 
             // Достаточно объявления только этой строки, чтобы взялись все валидаторы из этой сборки, которые наследуются от AbstractValidator
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePersonValidator>();
+
+            // Добавление Swagger к проекту
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
         }
     }
 }
