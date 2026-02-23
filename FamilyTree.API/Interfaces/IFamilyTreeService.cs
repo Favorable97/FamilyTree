@@ -17,6 +17,20 @@
         public Task<List<ShortPersonDTO>> GetChildrenAsync(Guid personId);
 
         /// <summary>
+        /// Получение братьев и сестер
+        /// </summary>
+        /// <param name="personId">Персона, чьх братьев и сестер ищем</param>
+        /// <returns></returns>
+        public Task<List<ShortPersonDTO>> GetSiblingsAsync(Guid personId);
+
+        /// <summary>
+        /// Получить дядь и теть человека
+        /// </summary>
+        /// <param name="personId">Персона, чьих дядь и теть ищем</param>
+        /// <returns></returns>
+        public Task<List<ShortPersonDTO>> GetUnclesAndAuntAsync(Guid personId);
+
+        /// <summary>
         /// Создание дерева из предков и потомков
         /// </summary>
         /// <param name="personId">Человек, по которому строится дерево</param>

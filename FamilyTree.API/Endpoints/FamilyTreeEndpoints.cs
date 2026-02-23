@@ -23,6 +23,20 @@
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
 
+            group.MapGet("/siblings/{personId}", GetSiblings)
+                .WithName("GetSiblingsByPerson")
+                .WithSummary("Получить братьев и сестер")
+                .Produces<ApiResponse<List<ShortPersonDTO>>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
+
+            group.MapGet("/uncles-and-aunts/{personId}", GetUnclesAndAunt)
+                .WithName("GetSiblingsByPerson")
+                .WithSummary("Получить дядь и теть")
+                .Produces<ApiResponse<List<ShortPersonDTO>>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
+
             group.MapGet("/tree/{personId}", GetTreePerson)
                 .WithName("GetTreeByPerson")
                 .WithSummary("Получить дерево по персоне")
@@ -53,6 +67,20 @@
             var data = await service.GetChildrenAsync(personId);
 
             return data.Count > 0 ? Results.Ok(ApiResponse<List<ShortPersonDTO>>.Ok(data, "Дети персоны")) : Results.NoContent();
+        }
+
+        private async static Task<IResult> GetSiblings(IFamilyTreeService service, Guid personId)
+        {
+            var data = await service.GetSiblingsAsync(personId);
+
+            return data.Count > 0 ? Results.Ok(ApiResponse<List<ShortPersonDTO>>.Ok(data, "Братья и сестра персоны")) : Results.NoContent();
+        }
+
+        private async static Task<IResult> GetUnclesAndAunt(IFamilyTreeService service, Guid personId)
+        {
+            var data = await service.GetUnclesAndAuntAsync(personId);
+
+            return data.Count > 0 ? Results.Ok(ApiResponse<List<ShortPersonDTO>>.Ok(data, "Дяди тети персоны")) : Results.NoContent();
         }
 
         private async static Task<IResult> GetTreePerson(IFamilyTreeService service, Guid personId, int maxDepth)

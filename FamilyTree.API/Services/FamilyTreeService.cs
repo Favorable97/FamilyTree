@@ -1,8 +1,4 @@
-﻿
-using FamilyTree.API.Mappers;
-using FamilyTree.Data.Interfaces;
-using Microsoft.AspNetCore.Components.Forms;
-using System.ComponentModel;
+﻿using FamilyTree.Data.Interfaces;
 
 namespace FamilyTree.API.Services
 {
@@ -20,8 +16,8 @@ namespace FamilyTree.API.Services
 
             var motherDTO = mother != null ? PersonMapper.MapToShortPersonDTO(mother) : null;
 
-            var fatherDTO = father != null ? PersonMapper.MapToShortPersonDTO(father) : null; 
-            
+            var fatherDTO = father != null ? PersonMapper.MapToShortPersonDTO(father) : null;
+
             return (motherDTO, fatherDTO);
         }
 
@@ -54,6 +50,40 @@ namespace FamilyTree.API.Services
             return root;
         }
 
+        public async Task<List<ShortPersonDTO>> GetSiblingsAsync(Guid personId)
+        {
+            var (mother, father) = await GetParentsAsync(personId);
+
+            List<ShortPersonDTO> siblings = [];
+
+            if (mother != null)
+            {
+                siblings.AddRange(await GetChildrenAsync(mother.Id));
+            }
+
+            if (father != null)
+            {
+                siblings.AddRange(await GetChildrenAsync(father.Id));
+            }
+
+            return [.. siblings.Where(x => x.Id != personId).Distinct()];
+        }
+
+        public async Task<List<ShortPersonDTO>> GetUnclesAndAuntAsync(Guid personId)
+        {
+            var (mother, father) = await GetParentsAsync(personId);
+
+            var result = new List<ShortPersonDTO>();
+
+            if (mother != null)
+                result.AddRange(await GetSiblingsAsync(mother.Id));
+
+            if (father != null)
+                result.AddRange(await GetSiblingsAsync(father.Id));
+
+            return [.. result.Distinct()];
+        }
+
         #region Вспомогательные методы
         private async Task<PersonTreeNodeDTO> CreateNode(Guid personId)
         {
@@ -74,24 +104,24 @@ namespace FamilyTree.API.Services
             if (depth == 0 || !visited.Add(node.Person.Id))
                 return;
 
-            var (Mother, Father) = await GetParentsAsync(node.Person.Id);
+            var (mother, father) = await GetParentsAsync(node.Person.Id);
 
-            if (Mother != null)
+            if (mother != null)
             {
-                PersonTreeNodeDTO mother = await CreateNode(Mother.Id);
-                
-                node.Parents.Add(mother);
+                PersonTreeNodeDTO motherDto = await CreateNode(mother.Id);
 
-                await BuildParents(mother, depth - 1, visited);
+                node.Parents.Add(motherDto);
+
+                await BuildParents(motherDto, depth - 1, visited);
             }
 
-            if (Father != null)
+            if (father != null)
             {
-                PersonTreeNodeDTO father = await CreateNode(Father.Id);
+                PersonTreeNodeDTO fatherDto = await CreateNode(father.Id);
 
-                node.Parents.Add(father);
+                node.Parents.Add(fatherDto);
 
-                await BuildParents(father, depth - 1, visited);
+                await BuildParents(fatherDto, depth - 1, visited);
             }
         }
 
