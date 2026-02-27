@@ -9,12 +9,10 @@ namespace FamilyTree.Data.Utils
 {
     public static class ParametersParseSQLString
     {
-        public static DBParameter[] GetParamsFromCommand(string command, Person person)
+        private static readonly Regex regex = new(@"@\w*", RegexOptions.Compiled);
+        public static DBParameter[] GetParamsFromCommand<T>(string command, T data)
         {
             List<DBParameter> paramList = [];
-
-            var pattern = @"@\w*";
-            var regex = new Regex(pattern);
 
             var matches = regex.Matches(command);
 
@@ -22,11 +20,11 @@ namespace FamilyTree.Data.Utils
             {
                 foreach (Match match in matches)
                 {
-                    paramList.Add(DBParameter.Create(match.Value, MatchParams(match.Value.Replace("@", ""), person)));
+                    paramList.Add(DBParameter.Create(match.Value, MatchParams(match.Value.Replace("@", ""), data!)));
                 }
             }
 
-            return [.. paramList];
+            return [.. paramList.DistinctBy(x => x.Name)];
         }
 
         private static object? MatchParams(string propName, object parameter)

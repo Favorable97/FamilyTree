@@ -18,7 +18,7 @@ namespace FamilyTree.Data.Repositories
                 @"INSERT INTO Person (Id, LastName, FirstName, MiddleName, BirthDate, DeathDate, Gender, MotherId, FatherId) 
                 VALUES (@Id, @LastName, @FirstName, @MiddleName, @BirthDate, @DeathDate, @Gender, @MotherId, @FatherId)";
 
-            var parameters = ParametersParseSQLString.GetParamsFromCommand(sql, person);
+            var parameters = ParametersParseSQLString.GetParamsFromCommand<Person>(sql, person);
 
             await _context.ExecuteCommandAsync(sql, parameters);
         }
@@ -101,7 +101,7 @@ namespace FamilyTree.Data.Repositories
 	                FatherId = @FatherId
                 WHERE Id = @Id";
 
-            var parameters = ParametersParseSQLString.GetParamsFromCommand(sql, person);
+            var parameters = ParametersParseSQLString.GetParamsFromCommand<Person>(sql, person);
 
             await _context.ExecuteCommandAsync(sql, parameters);
         }
