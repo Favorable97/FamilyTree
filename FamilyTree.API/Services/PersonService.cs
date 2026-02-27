@@ -14,12 +14,7 @@ namespace FamilyTree.API.Services
     public class PersonService(IPersonRepository repository) : IPersonService
     {
         private readonly IPersonRepository _repository = repository;
-
-        /// <summary>
-        /// Сервис по добавлению человека
-        /// </summary>
-        /// <param name="requestAddPersonDTO">Объект данных о человеке</param>
-        /// <returns></returns>
+        
         public async Task<PersonDTO> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
             await СheckExistsPerson(requestAddPersonDTO.LastName, requestAddPersonDTO.FirstName, requestAddPersonDTO.MiddleName, requestAddPersonDTO.BirthDate);
@@ -47,12 +42,6 @@ namespace FamilyTree.API.Services
             return PersonMapper.MapToPersonDTO(person, mother, father);
         }
 
-        /// <summary>
-        /// Сервис по изменению информации о человеке
-        /// </summary>
-        /// <param name="id">Id человека</param>
-        /// <param name="requestUpdatePersonDTO">Информация для изменения</param>
-        /// <returns></returns>
         public async Task<PersonDTO> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
         {
             var personFromDB = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
@@ -80,23 +69,14 @@ namespace FamilyTree.API.Services
 
             return PersonMapper.MapToPersonDTO(updatePerson, mother, father);
         }
-
-        /// <summary>
-        /// Получение списка всех людей в системе
-        /// </summary>
-        /// <returns></returns>
+        
         public async Task<List<ShortPersonDTO>> GetAllPersonAsync()
         {
             List<Person> persons = await _repository.GetAllPersonAsync();
             
             return [.. persons.Select(PersonMapper.MapToShortPersonDTO)];
         }
-
-        /// <summary>
-        /// Получение человека по Id
-        /// </summary>
-        /// <param name="id">Id человека</param>
-        /// <returns></returns>
+        
         public async Task<PersonDTO> GetPersonByIdAsync(Guid id)
         {
             Person? person = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
@@ -113,13 +93,23 @@ namespace FamilyTree.API.Services
 
             return personDTO;
         }
+
+        public async Task<ShortPersonDTO> GetShortPersonByIdAsync(Guid id)
+        {
+            Person? person = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
+
+            var mother = person.MotherID == null
+                ? null
+                : await _repository.GetPersonByIdAsync(person.MotherID.Value);
+
+            var father = person.FatherID == null
+                ? null
+                : await _repository.GetPersonByIdAsync(person.FatherID.Value);
+
+            return PersonMapper.MapToShortPersonDTO(person);
+        }
+
         
-        /// <summary>
-        /// Удаление человека
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
         public async Task DeletePersonAsync(Guid id)
         {
             var person = await _repository.GetPersonByIdAsync(id) ?? throw new PersonNotFoundException(id);
