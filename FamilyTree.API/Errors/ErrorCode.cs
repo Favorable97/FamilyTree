@@ -10,6 +10,11 @@
         ParentNotFound,
         PersonHasChildren,
         FamilyTreeCycle,
+
+        MarriageNotFound,
+        ActiveMarriageExists,
+        InvalidMarriageData,
+
         FatalError
     }
 }
