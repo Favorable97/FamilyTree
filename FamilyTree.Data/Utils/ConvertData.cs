@@ -34,6 +34,29 @@ namespace FamilyTree.Data.Utils
             return list;
         }
 
+        public static List<Marriage> ConvertToListMarriage(DataTable table)
+        {
+            List<Marriage> list = [];
+
+            foreach (DataRow dr in table.Rows)
+            {
+                var marriage = new Marriage()
+                {
+                    Id = (Guid)dr["Id"],
+                    Spouse1Id = (Guid)dr["Spouse1Id"],
+                    Spouse2Id = (Guid)dr["Spouse2Id"],
+                    BeginDate = (DateTime)dr["BeginDate"],
+                    EndDate = dr["EndDate"] == DBNull.Value
+                        ? null
+                        : (DateTime)dr["EndDate"]
+                };
+
+                list.Add(marriage);
+            }
+
+            return list;
+        }
+
         /*public static Person ConvertToPersonWithParent(DataTable table)
         {
             DataRow row = table.Rows[0];
