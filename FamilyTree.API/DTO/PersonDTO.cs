@@ -32,7 +32,7 @@
         /// <summary>
         /// Пол
         /// </summary>
-        public Gender Gender { get; init; }
+        public string Gender { get; init; } = string.Empty!;
         /// <summary>
         /// Сссылка на маму человека
         /// </summary>

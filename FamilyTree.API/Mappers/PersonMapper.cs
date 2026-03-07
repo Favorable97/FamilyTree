@@ -17,7 +17,7 @@
             MiddleName = person.MiddleName,
             BirthDate = person.BirthDate,
             DeathDate = person.DeathDate,
-            Gender = person.Gender,
+            Gender = person.Gender.ToString(),
 
             Mother = mother == null ? null : MapToShortPersonDTO(mother),
 
