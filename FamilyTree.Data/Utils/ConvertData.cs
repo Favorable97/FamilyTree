@@ -57,6 +57,27 @@ namespace FamilyTree.Data.Utils
             return list;
         }
 
+        public static List<LifeEvent> ConvertToListLifeEvent(DataTable table)
+        {
+            List<LifeEvent> list = [];
+
+            foreach (DataRow dr in table.Rows)
+            {
+                var lifeEvent = new LifeEvent()
+                {
+                    Id = (Guid)dr["Id"],
+                    PersonId = (Guid)dr["PersonId"],
+                    Type = (LifeEventType)dr["Type"],
+                    Date = (DateTime)dr["Date"],
+                    Description = dr["Description"].ToString() ?? ""
+                };
+
+                list.Add(lifeEvent);
+            }
+
+            return list;
+        }
+
         /*public static Person ConvertToPersonWithParent(DataTable table)
         {
             DataRow row = table.Rows[0];
