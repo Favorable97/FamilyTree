@@ -31,7 +31,7 @@
                 .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
 
             group.MapGet("/uncles-and-aunts/{personId}", GetUnclesAndAunt)
-                .WithName("GetSiblingsByPerson")
+                .WithName("GetUnclesAndAuntAsync")
                 .WithSummary("Получить дядь и теть")
                 .Produces<ApiResponse<List<ShortPersonDTO>>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent)
