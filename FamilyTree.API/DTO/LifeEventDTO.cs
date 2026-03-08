@@ -4,6 +4,6 @@
     {
         public string Type { get; init; } = string.Empty!;
         public DateTime Date { get; init; }
-        public string? Desciption { get; init; }
+        public string? Description { get; init; }
     }
 }

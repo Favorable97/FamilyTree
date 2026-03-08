@@ -12,7 +12,7 @@
                 {
                     Type = lifeEvent.Type.ToString(),
                     Date = lifeEvent.Date,
-                    Desciption = lifeEvent.Description ?? ""
+                    Description = lifeEvent.Description ?? ""
                 };
 
                 list.Add(ev);
