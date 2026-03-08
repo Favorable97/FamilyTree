@@ -11,9 +11,10 @@ using System.Threading.Tasks;
 
 namespace FamilyTree.API.Services
 {
-    public class PersonService(IPersonRepository repository) : IPersonService
+    public class PersonService(IPersonRepository repository, ILifeEventService lifeEvent) : IPersonService
     {
         private readonly IPersonRepository _repository = repository;
+        private readonly ILifeEventService _lifeEvent = lifeEvent;
         
         public async Task<PersonDTO> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
@@ -39,6 +40,19 @@ namespace FamilyTree.API.Services
 
             var father = person.FatherID != null ? await _repository.GetPersonByIdAsync(person.FatherID.Value) : null;
 
+            await _lifeEvent.AddEventAsync(
+                person.Id,
+                LifeEventType.Birth,
+                person.BirthDate
+            );
+
+            if (person.DeathDate != null)
+                await _lifeEvent.AddEventAsync(
+                    person.Id,
+                    LifeEventType.Death,
+                    person.DeathDate.Value
+                );
+
             return PersonMapper.MapToPersonDTO(person, mother, father);
         }
 
@@ -60,6 +74,14 @@ namespace FamilyTree.API.Services
             };
 
             await ParentValidation(updatePerson);
+
+            if (requestUpdatePersonDTO.DeathDate != null
+                && !(await CheckDeathDateForAddEvent(id)))
+                await _lifeEvent.AddEventAsync(
+                    id,
+                    LifeEventType.Death,
+                    requestUpdatePersonDTO.DeathDate.Value
+                );
 
             await _repository.UpdatePersonAsync(updatePerson);
 
@@ -167,6 +189,12 @@ namespace FamilyTree.API.Services
                 throw new PersonIsParentException();
         }
 
+        private async Task<bool> CheckDeathDateForAddEvent(Guid personId)
+        {
+            var eventList = await _lifeEvent.GetTimelineAsync(personId);
+
+            return eventList.Exists(ev => ev.Type.Equals("Death", StringComparison.OrdinalIgnoreCase));
+        }
         #endregion
     }
 }

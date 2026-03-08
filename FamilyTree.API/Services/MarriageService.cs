@@ -3,17 +3,18 @@ using FamilyTree.Data.Interfaces;
 
 namespace FamilyTree.API.Services
 {
-    public class MarriageService(IMarriageRepository repository, IPersonService personService) : IMarriageService
+    public class MarriageService(IMarriageRepository repository, IPersonService personService, ILifeEventService lifeEvent) : IMarriageService
     {
         private readonly IMarriageRepository _repository = repository;
         private readonly IPersonService _personService = personService;
+        private readonly ILifeEventService _lifeEventService = lifeEvent;
 
         public async Task<MarriageDTO> CreateMarriageAsync(RequestAddMarriageDTO dto)
         {
             var spouse1 = await _personService.GetShortPersonByIdAsync(dto.Spouse1Id) ?? throw new PersonNotFoundException(dto.Spouse1Id);
             var spouse2 = await _personService.GetShortPersonByIdAsync(dto.Spouse2Id) ?? throw new PersonNotFoundException(dto.Spouse2Id);
 
-            await CheckSpouses(spouse1, spouse2);
+            await CheckSpouses(spouse1, spouse2, dto.BeginDate);
 
             Marriage marriage = new()
             {
@@ -21,6 +22,37 @@ namespace FamilyTree.API.Services
                 Spouse2Id = dto.Spouse2Id,
                 BeginDate = dto.BeginDate
             };
+
+            await _lifeEventService.AddEventAsync(
+                dto.Spouse1Id,
+                LifeEventType.Marriage,
+                dto.BeginDate,
+                $"Брак с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
+            );
+
+            await _lifeEventService.AddEventAsync(
+                dto.Spouse2Id,
+                LifeEventType.Marriage,
+                dto.BeginDate,
+                $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
+            );
+
+            if (dto.EndDate != null)
+            {
+                await _lifeEventService.AddEventAsync(
+                    dto.Spouse1Id,
+                    LifeEventType.Marriage,
+                    dto.BeginDate,
+                    $"Развод с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
+                );
+
+                await _lifeEventService.AddEventAsync(
+                    dto.Spouse2Id,
+                    LifeEventType.Divorce,
+                    dto.BeginDate,
+                    $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
+                );
+            }
 
             await _repository.AddAsync(marriage);
 
@@ -31,6 +63,9 @@ namespace FamilyTree.API.Services
         {
             var marriage = await _repository.GetByIdAsync(dto.MarriageId) ?? throw new MarriageNotFoundException();
 
+            var spouse1 = await _personService.GetShortPersonByIdAsync(marriage.Spouse1Id) ?? throw new PersonNotFoundException(marriage.Spouse1Id);
+            var spouse2 = await _personService.GetShortPersonByIdAsync(marriage.Spouse2Id) ?? throw new PersonNotFoundException(marriage.Spouse2Id);
+
             await CheckMarriage(marriage);
 
             if (dto.DivorceDate < marriage.BeginDate)
@@ -38,10 +73,21 @@ namespace FamilyTree.API.Services
 
             marriage.EndDate = dto.DivorceDate;
 
-            await _repository.UpdateAsync(marriage);
+            await _lifeEventService.AddEventAsync(
+                    marriage.Spouse1Id,
+                    LifeEventType.Marriage,
+                    marriage.BeginDate,
+                    $"Развод с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
+                );
 
-            var spouse1 = await _personService.GetShortPersonByIdAsync(marriage.Spouse1Id);
-            var spouse2 = await _personService.GetShortPersonByIdAsync(marriage.Spouse2Id);
+            await _lifeEventService.AddEventAsync(
+                marriage.Spouse2Id,
+                LifeEventType.Divorce,
+                marriage.BeginDate,
+                $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
+            );
+
+            await _repository.UpdateAsync(marriage);
 
             return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
         }
@@ -77,21 +123,26 @@ namespace FamilyTree.API.Services
 
         #region Вспомогательные методы
 
-        private async Task CheckSpouses(ShortPersonDTO spouse1, ShortPersonDTO spouse2)
+        private async Task CheckSpouses(ShortPersonDTO spouse1, ShortPersonDTO spouse2, DateTime beginDate)
         {
             if (spouse1.Id.Equals(spouse2.Id))
                 throw new InvalidMarriageDataException("Супруги не могут быть равны друг другу");
 
-            await CheckSpouse(spouse1.Id);
-            await CheckSpouse(spouse2.Id);
+            await CheckSpouse(spouse1, beginDate);
+            await CheckSpouse(spouse2, beginDate);
         }
 
-        private async Task CheckSpouse(Guid spouseId)
+        private async Task CheckSpouse(ShortPersonDTO spouse, DateTime beginDate)
         {
-            var married = await _repository.GetActiveMarriageAsync(spouseId);
+            if (spouse.DeathDate < beginDate)
+                throw new InvalidMarriageDataException("Нельзя добавить брак умершему человеку");
+
+            var married = await _repository.GetActiveMarriageAsync(spouse.Id);
 
             if (married != null)
                 throw new ActiveMarriageExistsException();
+
+            
         }
 
         private async Task CheckMarriage(Marriage marriage)
@@ -99,6 +150,8 @@ namespace FamilyTree.API.Services
             if (marriage.EndDate != null)
                 throw new InvalidMarriageDataException("Брак уже закрыт");
         }
+
+        private string GetFullName(string lastName, string firstName, string? middleName) => firstName + middleName + middleName ?? "";
         #endregion
     }
 }
