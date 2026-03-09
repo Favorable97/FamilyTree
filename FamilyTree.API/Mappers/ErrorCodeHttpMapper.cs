@@ -9,11 +9,15 @@ namespace FamilyTree.API.Mappers
             {
                 ErrorCode.PersonNotFound => StatusCodes.Status404NotFound,
                 ErrorCode.ParentNotFound => StatusCodes.Status404NotFound,
+                ErrorCode.MarriageNotFound => StatusCodes.Status404NotFound,
 
                 ErrorCode.PersonAlreadyExists => StatusCodes.Status409Conflict,
                 ErrorCode.PersonHasChildren => StatusCodes.Status409Conflict,
+                ErrorCode.InvalidMarriageData => StatusCodes.Status409Conflict,
+                
 
                 ErrorCode.InvalidParent => StatusCodes.Status422UnprocessableEntity,
+                ErrorCode.ActiveMarriageExists => StatusCodes.Status422UnprocessableEntity,
 
                 _ => StatusCodes.Status404NotFound
             };
