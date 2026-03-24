@@ -9,8 +9,8 @@ namespace FamilyTree.Data.Repositories
         public async Task AddEventAsync(LifeEvent lifeEvent)
         {
             string sql =
-                @"INSERT INTO LifeEvent(PersonId, [Type], [Date], [Description])
-                VALUES (@PersonID, @Type, @Date, @Description)";
+                @"INSERT INTO LifeEvent(Id, PersonId, [Type], [Date], [Description])
+                VALUES (@Id, @PersonID, @Type, @Date, @Description)";
 
             var parameters = ParametersParseSQLString.GetParamsFromCommand<LifeEvent>(sql, lifeEvent);
 
