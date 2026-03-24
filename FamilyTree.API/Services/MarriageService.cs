@@ -41,7 +41,7 @@ namespace FamilyTree.API.Services
             {
                 await _lifeEventService.AddEventAsync(
                     dto.Spouse1Id,
-                    LifeEventType.Marriage,
+                    LifeEventType.Divorce,
                     dto.BeginDate,
                     $"Развод с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
                 );
@@ -75,7 +75,7 @@ namespace FamilyTree.API.Services
 
             await _lifeEventService.AddEventAsync(
                     marriage.Spouse1Id,
-                    LifeEventType.Marriage,
+                    LifeEventType.Divorce,
                     marriage.BeginDate,
                     $"Развод с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
                 );
@@ -151,7 +151,12 @@ namespace FamilyTree.API.Services
                 throw new InvalidMarriageDataException("Брак уже закрыт");
         }
 
-        private string GetFullName(string lastName, string firstName, string? middleName) => firstName + middleName + middleName ?? "";
+        private string GetFullName(string lastName, string firstName, string? middleName)
+        {
+            return string.Join(' ', new[] { lastName, firstName, middleName }
+                .Where(s => !string.IsNullOrWhiteSpace(s)))
+                .Trim();
+        }
         #endregion
     }
 }
