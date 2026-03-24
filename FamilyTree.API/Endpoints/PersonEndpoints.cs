@@ -59,7 +59,7 @@ namespace FamilyTree.API.Endpoints
 
             var response = data.Count > 0 
                 ? ApiResponse<List<ShortPersonDTO>>.Ok(data!, "") 
-                : ApiResponse<List<ShortPersonDTO>>.Error("Список пуст", Errors.ErrorCode.PersonNotFound, null);
+                : ApiResponse<List<ShortPersonDTO>>.Error("Список пуст", ErrorCode.PersonNotFound, null);
 
             return data.Count > 0 ? Results.Ok(response) : Results.NotFound(response);
         }

@@ -24,7 +24,7 @@ namespace FamilyTree.API.Endpoints
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
 
-            group.MapGet("/create", CreateMarriage)
+            group.MapPost("/create", CreateMarriage)
                 .WithName("CreateMarriage")
                 .WithSummary("Создать брак")
                 .Produces<ApiResponse<MarriageDTO>>(StatusCodes.Status200OK)
@@ -34,7 +34,7 @@ namespace FamilyTree.API.Endpoints
                 .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity)
                 .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError);
 
-            group.MapGet("/divorce", Divorce)
+            group.MapPost("/divorce", Divorce)
                .WithName("Divorce")
                .WithSummary("Добавление информации о разводе")
                .Produces<ApiResponse<MarriageDTO>>(StatusCodes.Status200OK)

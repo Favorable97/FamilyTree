@@ -2,16 +2,13 @@
 
 namespace FamilyTree.API.Services
 {
-    public class LifeEventService(ILifeEventRepository repository, IPersonService personService) : ILifeEventService
+    public class LifeEventService(ILifeEventRepository repository) : ILifeEventService
     {
         private readonly ILifeEventRepository _repository = repository;
-        private readonly IPersonService _personService = personService;
+        // !!! private readonly IPersonService _personService = personService; Это вызывает ошибку Dependency Direction !!!
 
         public async Task AddEventAsync(Guid personId, LifeEventType type, DateTime date, string? description = null)
         {
-            await ValidationPerson(personId);
-
-
             LifeEvent lifeEvent = new()
             {
                 Id = Guid.NewGuid(),
@@ -26,16 +23,14 @@ namespace FamilyTree.API.Services
 
         public async Task<List<LifeEventDTO>> GetTimelineAsync(Guid personId)
         {
-            await ValidationPerson(personId);
-
             List<LifeEvent> events = await _repository.GetByPersonIdAsync(personId);
 
             return LifeEventMapper.Map(events);
         }
 
-        private async Task ValidationPerson(Guid personId)
-        {
-            var person = await _personService.GetPersonByIdAsync(personId) ?? throw new PersonNotFoundException(personId);
-        }
+        //private async Task ValidationPerson(Guid personId)
+        //{
+        //    var person = await _personService.GetPersonByIdAsync(personId) ?? throw new PersonNotFoundException(personId);
+        //}
     }
 }
