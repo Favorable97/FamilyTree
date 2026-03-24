@@ -1,7 +1,6 @@
 using FamilyTree.API;
 using FamilyTree.API.Endpoints;
 using FamilyTree.API.Middleware;
-using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +19,10 @@ app.ExceptionMiddleware();
 app.MapPersonEndpoints();
 
 app.MapFamilyTreeEndponts();
+
+app.MapMarriageEndponts();
+
+app.MapLifeEventEndpoints();
 
 app.Run();
 
