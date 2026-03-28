@@ -48,7 +48,10 @@ namespace FamilyTree.Data.Utils
                     BeginDate = (DateTime)dr["BeginDate"],
                     EndDate = dr["EndDate"] == DBNull.Value
                         ? null
-                        : (DateTime)dr["EndDate"]
+                        : (DateTime)dr["EndDate"],
+                    EndReason = dr["EndReason"] == DBNull.Value
+                        ? null
+                        : (MarriageEndReason)(int)dr["EndReason"]
                 };
 
                 list.Add(marriage);

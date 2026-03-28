@@ -9,5 +9,6 @@
 
         public DateTime BeginDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public MarriageEndReason? EndReason { get; set; }
     }
 }

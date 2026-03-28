@@ -14,8 +14,8 @@ namespace FamilyTree.Data.Repositories
         public async Task AddAsync(Marriage marriage)
         {
             string sql =
-                @"INSERT INTO Marriage(Id, Spouse1Id, Spouse2Id, BeginDate, EndDate)
-                VALUES (@Id, @Spouse1Id, @Spouse2Id, @BeginDate, @EndDate)";
+                @"INSERT INTO Marriage(Id, Spouse1Id, Spouse2Id, BeginDate, EndDate, EndReason)
+                VALUES (@Id, @Spouse1Id, @Spouse2Id, @BeginDate, @EndDate, @EndReason)";
 
             var parameters = ParametersParseSQLString.GetParamsFromCommand<Marriage>(sql, marriage);
 
@@ -30,7 +30,8 @@ namespace FamilyTree.Data.Repositories
                       Spouse1Id = @Spouse1Id,
                       Spouse2Id = @Spouse2Id,
                       BeginDate = @BeginDate,
-                      EndDate = @EndDate
+                      EndDate = @EndDate,
+                      EndReason = @EndReason
                 WHERE Id = @Id";
 
             var parameters = ParametersParseSQLString.GetParamsFromCommand<Marriage>(sql, marriage);

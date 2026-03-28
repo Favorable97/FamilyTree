@@ -72,6 +72,7 @@ namespace FamilyTree.API.Services
                 throw new InvalidMarriageDataException("Дата начала брака не может быть больше, чем дата развода");
 
             marriage.EndDate = dto.DivorceDate;
+            marriage.EndReason = dto.EndReason;
 
             await _lifeEventService.AddEventAsync(
                     marriage.Spouse1Id,
