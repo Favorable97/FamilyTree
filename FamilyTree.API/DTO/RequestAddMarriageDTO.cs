@@ -6,6 +6,5 @@
         public Guid Spouse2Id { get; init; }
 
         public DateTime BeginDate { get; init; }
-        public DateTime? EndDate { get; init; }
     }
 }

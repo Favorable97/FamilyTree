@@ -8,7 +8,8 @@
             Spouse1 = spouse1,
             Spouse2 = spouse2,
             BeginDate = marriage.BeginDate,
-            EndDate = marriage.EndDate
+            EndDate = marriage.EndDate,
+            EndReason = marriage.EndReason
         };
             
     }

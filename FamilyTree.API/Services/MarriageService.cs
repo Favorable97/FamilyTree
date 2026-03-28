@@ -37,23 +37,6 @@ namespace FamilyTree.API.Services
                 $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
             );
 
-            if (dto.EndDate != null)
-            {
-                await _lifeEventService.AddEventAsync(
-                    dto.Spouse1Id,
-                    LifeEventType.Divorce,
-                    dto.BeginDate,
-                    $"Развод с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
-                );
-
-                await _lifeEventService.AddEventAsync(
-                    dto.Spouse2Id,
-                    LifeEventType.Divorce,
-                    dto.BeginDate,
-                    $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
-                );
-            }
-
             await _repository.AddAsync(marriage);
 
             return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);

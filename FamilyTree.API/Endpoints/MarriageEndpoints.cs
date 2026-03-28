@@ -77,8 +77,13 @@ namespace FamilyTree.API.Endpoints
             return Results.Ok(ApiResponse<MarriageDTO>.Ok(marriage, "Брак успешно добавлен"));
         }
 
-        private async static Task<IResult> Divorce(IMarriageService service, RequestAddDivorceDTO dto)
+        private async static Task<IResult> Divorce(IMarriageService service, IValidator<RequestAddDivorceDTO> validator, RequestAddDivorceDTO dto)
         {
+            var validate = await validator.ValidateAsync(dto);
+
+            if (!validate.IsValid)
+                throw new FluentValidation.ValidationException(validate.Errors);
+
             var marriage = await service.DivorceAsync(dto);
 
             return Results.Ok(ApiResponse<MarriageDTO>.Ok(marriage, "Брак обновлен. Развод применен"));
