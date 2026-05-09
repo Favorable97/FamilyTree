@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 
 namespace FamilyTree.API.Endpoints
 {
@@ -13,14 +14,13 @@ namespace FamilyTree.API.Endpoints
                 .WithName("GetAllPersons")
                 .WithSummary("Получить всех людей из системы")
                 .Produces<ApiResponse<List<ShortPersonDTO>>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<List<ShortPersonDTO>>>(StatusCodes.Status404NotFound)
                 .Produces<object>(StatusCodes.Status500InternalServerError);
 
             group.MapGet("/{id}", GetPersonById)
                 .WithName("GetPersonById")
                 .WithSummary("Получить человека по Id")
-                .Produces<ApiResponse<ShortPersonDTO>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<ShortPersonDTO>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<PersonDTO>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
                 .Produces<object>(StatusCodes.Status500InternalServerError);
 
             group.MapPost("/", CreatePerson)
@@ -57,25 +57,17 @@ namespace FamilyTree.API.Endpoints
         {
             var data = await service.GetAllPersonAsync();
 
-            var response = data.Count > 0 
-                ? ApiResponse<List<ShortPersonDTO>>.Ok(data!, "") 
-                : ApiResponse<List<ShortPersonDTO>>.Error("Список пуст", ErrorCode.PersonNotFound, null);
-
-            return data.Count > 0 ? Results.Ok(response) : Results.NotFound(response);
+            return Results.Ok(ApiResponse<List<ShortPersonDTO>>.Ok(data, "Список персон"));
         }
 
         private async static Task<IResult> GetPersonById(IPersonService service, Guid id)
         {
             if (id == Guid.Empty)
-                return Results.BadRequest("Указан некорректный идентификатор персоны!");
+                throw new FluentValidation.ValidationException([new ValidationFailure("id", "Указан некорректный идентификатор персоны")]);
 
             var data = await service.GetPersonByIdAsync(id);
 
-            var response = data == null 
-                ? ApiResponse<PersonDTO>.Error("Персона не найдена", Errors.ErrorCode.PersonNotFound, null) 
-                : ApiResponse<PersonDTO>.Ok(data, "");
-
-            return data != null ? Results.Ok(response) : Results.NotFound(response);
+            return Results.Ok(ApiResponse<PersonDTO>.Ok(data, ""));
         }
 
         private async static Task<IResult> CreatePerson(IPersonService service, IValidator<RequestAddPersonDTO> validator, RequestAddPersonDTO dto)
@@ -95,7 +87,7 @@ namespace FamilyTree.API.Endpoints
         private async static Task<IResult> UpdatePerson(IPersonService service, IValidator<RequestUpdatePersonDTO> validator, Guid id, RequestUpdatePersonDTO dto)
         {
             if (id == Guid.Empty)
-                return Results.BadRequest(ApiResponse<object>.Error("Указан некорректный идентификатор персоны!", Errors.ErrorCode.ValidationFailed, null));
+                throw new FluentValidation.ValidationException([new ValidationFailure("id", "Указан некорректный идентификатор персоны")]);
 
             var validate = await validator.ValidateAsync(dto);
 

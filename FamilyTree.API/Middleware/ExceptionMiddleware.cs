@@ -3,9 +3,11 @@
 
 namespace FamilyTree.API.Middleware
 {
-    public class ExceptionMiddleware(RequestDelegate next)
+    public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         private readonly RequestDelegate _next = next;
+
+        private readonly ILogger<ExceptionMiddleware> _logger = logger;
 
         public async Task InvokeAsync(HttpContext context)
         {
@@ -22,9 +24,20 @@ namespace FamilyTree.API.Middleware
                 {
                     Field = e.PropertyName,
                     Message = e.ErrorMessage
-                });
+                }).ToList();
 
-                var response = ApiResponse<object>.Error("Ошибка валидации входных данных", ErrorCode.ValidationFailed, errors);
+                _logger.LogWarning(
+                    "TraceId: {TraceId}. Не пройдена валидация для запроса {Method} {Path}. Errors: {@Errors}",
+                    context.TraceIdentifier,
+                    context.Request.Method,
+                    context.Request.Path,
+                    errors);
+
+                var response = ApiResponse<object>.Error(
+                    "Ошибка валидации входных данных", 
+                    ErrorCode.ValidationFailed, 
+                    context.TraceIdentifier,
+                    errors);
 
                 await context.Response.WriteAsJsonAsync(response);
             }
@@ -33,7 +46,19 @@ namespace FamilyTree.API.Middleware
                 context.Response.StatusCode = ErrorCodeHttpMapper.MapToStatusCode(de.ErrorCode);
                 context.Response.ContentType = "application/json";
 
-                var response = ApiResponse<object>.Error("Ошибка бизнесс логики", de.ErrorCode, de.Message);
+                _logger.LogWarning(
+                    "TraceId: {TraceId}. Доменная ошибка {ErrorCode} произошла во время обработки запроса в {Method} {Path}. Сообщение: {Message}",
+                    context.TraceIdentifier,
+                    de.ErrorCode,
+                    context.Request.Method,
+                    context.Request.Path,
+                    de.Message);
+
+                var response = ApiResponse<object>.Error(
+                    "Ошибка бизнес-логики", 
+                    de.ErrorCode, 
+                    context.TraceIdentifier, 
+                    null);
 
                 await context.Response.WriteAsJsonAsync(response);
             }
@@ -42,7 +67,18 @@ namespace FamilyTree.API.Middleware
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Response.ContentType = "application/json";
 
-                var response = ApiResponse<object>.Error("Произошла критическая ошибка", ErrorCode.FatalError, ex.Message);
+                _logger.LogError(
+                    ex,
+                    "TraceId: {TraceId}. Произошла необработанная ошибка при обработке запроса {Method} {Path}.",
+                    context.TraceIdentifier,
+                    context.Request.Method,
+                    context.Request.Path);
+
+                var response = ApiResponse<object>.Error(
+                    "Произошла необработанная ошибка", 
+                    ErrorCode.FatalError, 
+                    context.TraceIdentifier, 
+                    null);
 
                 await context.Response.WriteAsJsonAsync(response);
             }

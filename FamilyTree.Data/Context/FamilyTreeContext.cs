@@ -5,12 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 
 namespace FamilyTree.Data.Context
 {
-    public class FamilyTreeContext(string connectionString) : IAsyncDisposable
+    public class FamilyTreeContext(string connectionString, ILogger<FamilyTreeContext> logger) : IAsyncDisposable
     {
         private readonly string _connectionString = connectionString;
+        
+        private readonly ILogger<FamilyTreeContext> _logger = logger;
+
         private SqlConnection? _connection;
 
         private async Task<SqlConnection> GetOpenConnection()
@@ -33,7 +37,11 @@ namespace FamilyTree.Data.Context
             foreach (var parameter in parameters)
                 command.Parameters.AddWithValue(parameter.Name, parameter.Value);
 
-            return await command.ExecuteNonQueryAsync();
+            int rows = await command.ExecuteNonQueryAsync();
+
+            _logger.LogDebug("{Method}. Затронуто строк - {RowsCount}", nameof(ExecuteCommandAsync), rows);
+
+            return rows;
         }
 
         public async Task<DataTable> QueryAsync(string sqlQuery, params DBParameter[] parameters)
@@ -49,6 +57,8 @@ namespace FamilyTree.Data.Context
             var resultTable = new DataTable();
             resultTable.Load(reader); // этот метод синхронный, но не блокирует БД. Только копирование данных
 
+            _logger.LogDebug("{Method}. Количество строк: {RowsCount}", nameof(QueryAsync), resultTable.Rows.Count);
+
             return resultTable;
         }
 
@@ -61,7 +71,11 @@ namespace FamilyTree.Data.Context
             foreach (var parameter in parameters)
                 command.Parameters.AddWithValue(parameter.Name, parameter.Value);
 
-            return await command.ExecuteScalarAsync();
+            var result = await command.ExecuteScalarAsync();
+
+            _logger.LogDebug("{Method}. Результат был возвращен - {HasResult}", nameof(ExecuteScalarAsync), result != null);
+
+            return result;
         }
 
         public async ValueTask DisposeAsync()

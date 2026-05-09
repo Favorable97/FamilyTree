@@ -1,10 +1,10 @@
 ﻿
+using FamilyTree.API.Services;
 using FamilyTree.API.Validators;
 using FamilyTree.Data.Context;
 using FamilyTree.Data.Interfaces;
 using FamilyTree.Data.Repositories;
 using FluentValidation;
-using FamilyTree.API.Services;
 using System.Text.Json.Serialization;
 
 namespace FamilyTree.API
@@ -19,7 +19,7 @@ namespace FamilyTree.API
             });
 
             // Добавляем сервис для подключения к БД через DI
-            builder.Services.AddScoped<FamilyTreeContext>(_ => new FamilyTreeContext(builder.Configuration.GetConnectionString("mssql")!));
+            builder.Services.AddScoped<FamilyTreeContext>(provider => new FamilyTreeContext(builder.Configuration.GetConnectionString("mssql")!, provider.GetRequiredService<ILogger<FamilyTreeContext>>()));
 
             builder.Services.AddScoped<IPersonService, PersonService>();
 

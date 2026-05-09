@@ -11,10 +11,13 @@ using System.Threading.Tasks;
 
 namespace FamilyTree.API.Services
 {
-    public class PersonService(IPersonRepository repository, ILifeEventService lifeEvent) : IPersonService
+    public class PersonService(IPersonRepository repository, ILifeEventService lifeEvent, ILogger<PersonService> logger) : IPersonService
     {
         private readonly IPersonRepository _repository = repository;
+        
         private readonly ILifeEventService _lifeEvent = lifeEvent;
+
+        private readonly ILogger<PersonService> _logger = logger;
         
         public async Task<PersonDTO> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
@@ -53,6 +56,15 @@ namespace FamilyTree.API.Services
                     person.DeathDate.Value
                 );
 
+            _logger.LogInformation(
+                "Персона успешно добавлена. PersonId: {PersonId}. " +
+                "HasMother: {HasMother}. HasFather: {HasFather}. " +
+                "HasDeathDate: {HasDeathDate}.",
+                person.Id,
+                mother != null,
+                father != null,
+                person.DeathDate != null);
+
             return PersonMapper.MapToPersonDTO(person, mother, father);
         }
 
@@ -88,6 +100,17 @@ namespace FamilyTree.API.Services
             var mother = updatePerson.MotherID != null ? await _repository.GetPersonByIdAsync(updatePerson.MotherID.Value) : null;
 
             var father = updatePerson.FatherID != null ? await _repository.GetPersonByIdAsync(updatePerson.FatherID.Value) : null;
+
+            _logger.LogInformation(
+                "Персона успешно обновлена. " +
+                "PersonId: {PersonId}. " +
+                "HasMother: {HasMother}. " +
+                "HasFather: {HasFather}. " +
+                "HasDeathDate: {HasDeathDate}.",
+                id,
+                mother != null,
+                father != null,
+                updatePerson.DeathDate != null);
 
             return PersonMapper.MapToPersonDTO(updatePerson, mother, father);
         }
@@ -139,6 +162,8 @@ namespace FamilyTree.API.Services
             await IsParentPerson(id);
 
             await _repository.DeletePersonAsync(id);
+
+            _logger.LogInformation("Персона успешно удалена. PersonId: {PersonId}.", id);
         }
 
         #region Вспомогательные методы
@@ -148,6 +173,7 @@ namespace FamilyTree.API.Services
 
             if (isExist)
                 throw new PersonAlreadyExistsException();
+                
         }
 
         private async Task ParentValidation(Person person)
