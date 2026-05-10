@@ -17,6 +17,8 @@ namespace FamilyTree.Data.Context
 
         private SqlConnection? _connection;
 
+        private SqlTransaction? _transaction;
+
         private async Task<SqlConnection> GetOpenConnection()
         {
             if (_connection == null || _connection.State != ConnectionState.Open)
@@ -28,12 +30,52 @@ namespace FamilyTree.Data.Context
             return _connection;
         }
 
+        public async Task BeginTransactionAsync()
+        {
+            if (_transaction != null)
+                throw new InvalidOperationException("Транзакция уже была открыта");
+
+            var connection = await GetOpenConnection();
+
+            _transaction = (SqlTransaction)await connection.BeginTransactionAsync();
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            if (_transaction == null)
+                return;
+
+            await _transaction.CommitAsync();
+
+            await DisposeTransactionAsync();
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            if (_transaction == null)
+                return;
+
+            await _transaction.RollbackAsync();
+
+            await DisposeTransactionAsync();
+        }
+
+        private async Task DisposeTransactionAsync()
+        {
+            await _transaction!.DisposeAsync();
+
+            _transaction = null;
+        }
+
         public async Task<int> ExecuteCommandAsync(string sqlCommand, params DBParameter[] parameters)
         {
             var connection = await GetOpenConnection();
 
             using var command = new SqlCommand(sqlCommand, connection);
 
+            if (_transaction != null)
+                command.Transaction = _transaction;
+            
             foreach (var parameter in parameters)
                 command.Parameters.AddWithValue(parameter.Name, parameter.Value);
 
@@ -49,6 +91,9 @@ namespace FamilyTree.Data.Context
             var connection = await GetOpenConnection();
 
             using var command = new SqlCommand(sqlQuery, connection);
+
+            if (_transaction != null)
+                command.Transaction = _transaction;
 
             foreach (var parameter in parameters)
                 command.Parameters.AddWithValue(parameter.Name, parameter.Value);
@@ -68,6 +113,9 @@ namespace FamilyTree.Data.Context
 
             using var command = new SqlCommand(sqlCommand, connection);
 
+            if (_transaction != null)
+                command.Transaction = _transaction;
+
             foreach (var parameter in parameters)
                 command.Parameters.AddWithValue(parameter.Name, parameter.Value);
 
@@ -80,12 +128,17 @@ namespace FamilyTree.Data.Context
 
         public async ValueTask DisposeAsync()
         {
+            if (_transaction != null)
+                await DisposeTransactionAsync();
+            
+
             if (_connection != null)
             {
                 await _connection.CloseAsync();
                 await _connection.DisposeAsync();
                 _connection = null;
             }
+            
             GC.SuppressFinalize(this);
         }
     }

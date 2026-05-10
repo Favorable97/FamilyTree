@@ -35,6 +35,8 @@ namespace FamilyTree.API
 
             builder.Services.AddScoped<ILifeEventRepository, LifeEventRepository>();
 
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             // Достаточно объявления только этой строки, чтобы взялись все валидаторы из этой сборки, которые наследуются от AbstractValidator
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePersonValidator>();
 

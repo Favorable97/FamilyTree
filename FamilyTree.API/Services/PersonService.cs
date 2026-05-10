@@ -11,13 +11,15 @@ using System.Threading.Tasks;
 
 namespace FamilyTree.API.Services
 {
-    public class PersonService(IPersonRepository repository, ILifeEventService lifeEvent, ILogger<PersonService> logger) : IPersonService
+    public class PersonService(IPersonRepository repository, ILifeEventService lifeEvent, ILogger<PersonService> logger, IUnitOfWork unitOfWork) : IPersonService
     {
         private readonly IPersonRepository _repository = repository;
         
         private readonly ILifeEventService _lifeEvent = lifeEvent;
 
         private readonly ILogger<PersonService> _logger = logger;
+
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
         
         public async Task<PersonDTO> CreatePersonAsync(RequestAddPersonDTO requestAddPersonDTO)
         {
@@ -37,35 +39,49 @@ namespace FamilyTree.API.Services
 
             await ParentValidation(person);
 
-            await _repository.CreatePersonAsync(person);
+            try
+            {
+                await unitOfWork.BeginTransactionAsync();
 
-            var mother = person.MotherID != null ? await _repository.GetPersonByIdAsync(person.MotherID.Value) : null;
+                await _repository.CreatePersonAsync(person);
 
-            var father = person.FatherID != null ? await _repository.GetPersonByIdAsync(person.FatherID.Value) : null;
+                var mother = person.MotherID != null ? await _repository.GetPersonByIdAsync(person.MotherID.Value) : null;
 
-            await _lifeEvent.AddEventAsync(
-                person.Id,
-                LifeEventType.Birth,
-                person.BirthDate
-            );
+                var father = person.FatherID != null ? await _repository.GetPersonByIdAsync(person.FatherID.Value) : null;
 
-            if (person.DeathDate != null)
                 await _lifeEvent.AddEventAsync(
                     person.Id,
-                    LifeEventType.Death,
-                    person.DeathDate.Value
+                    LifeEventType.Birth,
+                    person.BirthDate
                 );
 
-            _logger.LogInformation(
-                "Персона успешно добавлена. PersonId: {PersonId}. " +
-                "HasMother: {HasMother}. HasFather: {HasFather}. " +
-                "HasDeathDate: {HasDeathDate}.",
-                person.Id,
-                mother != null,
-                father != null,
-                person.DeathDate != null);
+                if (person.DeathDate != null)
+                    await _lifeEvent.AddEventAsync(
+                        person.Id,
+                        LifeEventType.Death,
+                        person.DeathDate.Value
+                    );
 
-            return PersonMapper.MapToPersonDTO(person, mother, father);
+                _logger.LogInformation(
+                    "Персона успешно добавлена. PersonId: {PersonId}. " +
+                    "HasMother: {HasMother}. HasFather: {HasFather}. " +
+                    "HasDeathDate: {HasDeathDate}.",
+                    person.Id,
+                    mother != null,
+                    father != null,
+                    person.DeathDate != null);
+
+                await _unitOfWork.CommitTransactionAsync();
+
+                return PersonMapper.MapToPersonDTO(person, mother, father);
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+
+                throw;
+            }
+            
         }
 
         public async Task<PersonDTO> UpdatePersonAsync(Guid id, RequestUpdatePersonDTO requestUpdatePersonDTO)
@@ -86,33 +102,46 @@ namespace FamilyTree.API.Services
             };
 
             await ParentValidation(updatePerson);
+            
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
 
-            if (requestUpdatePersonDTO.DeathDate != null
-                && !(await CheckDeathDateForAddEvent(id)))
-                await _lifeEvent.AddEventAsync(
+                await _repository.UpdatePersonAsync(updatePerson);
+
+                if (requestUpdatePersonDTO.DeathDate != null
+                    && personFromDB.DeathDate == null)
+                    await _lifeEvent.AddEventAsync(
+                        id,
+                        LifeEventType.Death,
+                        requestUpdatePersonDTO.DeathDate.Value
+                    );
+
+                var mother = updatePerson.MotherID != null ? await _repository.GetPersonByIdAsync(updatePerson.MotherID.Value) : null;
+
+                var father = updatePerson.FatherID != null ? await _repository.GetPersonByIdAsync(updatePerson.FatherID.Value) : null;
+
+                _logger.LogInformation(
+                    "Персона успешно обновлена. " +
+                    "PersonId: {PersonId}. " +
+                    "HasMother: {HasMother}. " +
+                    "HasFather: {HasFather}. " +
+                    "HasDeathDate: {HasDeathDate}.",
                     id,
-                    LifeEventType.Death,
-                    requestUpdatePersonDTO.DeathDate.Value
-                );
+                    mother != null,
+                    father != null,
+                    updatePerson.DeathDate != null);
 
-            await _repository.UpdatePersonAsync(updatePerson);
+                await _unitOfWork.CommitTransactionAsync();
 
-            var mother = updatePerson.MotherID != null ? await _repository.GetPersonByIdAsync(updatePerson.MotherID.Value) : null;
+                return PersonMapper.MapToPersonDTO(updatePerson, mother, father);
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
 
-            var father = updatePerson.FatherID != null ? await _repository.GetPersonByIdAsync(updatePerson.FatherID.Value) : null;
-
-            _logger.LogInformation(
-                "Персона успешно обновлена. " +
-                "PersonId: {PersonId}. " +
-                "HasMother: {HasMother}. " +
-                "HasFather: {HasFather}. " +
-                "HasDeathDate: {HasDeathDate}.",
-                id,
-                mother != null,
-                father != null,
-                updatePerson.DeathDate != null);
-
-            return PersonMapper.MapToPersonDTO(updatePerson, mother, father);
+                throw;
+            }
         }
         
         public async Task<List<ShortPersonDTO>> GetAllPersonAsync()
@@ -153,7 +182,6 @@ namespace FamilyTree.API.Services
 
             return PersonMapper.MapToShortPersonDTO(person);
         }
-
         
         public async Task DeletePersonAsync(Guid id)
         {
@@ -161,9 +189,23 @@ namespace FamilyTree.API.Services
 
             await IsParentPerson(id);
 
-            await _repository.DeletePersonAsync(id);
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
 
-            _logger.LogInformation("Персона успешно удалена. PersonId: {PersonId}.", id);
+                await _repository.DeletePersonAsync(id);
+
+                _logger.LogInformation("Персона успешно удалена. PersonId: {PersonId}.", id);
+
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+
+                throw;
+            }
+            
         }
 
         #region Вспомогательные методы
@@ -213,13 +255,6 @@ namespace FamilyTree.API.Services
 
             if (isParent)
                 throw new PersonIsParentException();
-        }
-
-        private async Task<bool> CheckDeathDateForAddEvent(Guid personId)
-        {
-            var eventList = await _lifeEvent.GetTimelineAsync(personId);
-
-            return eventList.Exists(ev => ev.Type.Equals("Death", StringComparison.OrdinalIgnoreCase));
         }
         #endregion
     }

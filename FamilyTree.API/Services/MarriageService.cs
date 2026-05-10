@@ -3,11 +3,15 @@ using FamilyTree.Data.Interfaces;
 
 namespace FamilyTree.API.Services
 {
-    public class MarriageService(IMarriageRepository repository, IPersonService personService, ILifeEventService lifeEvent) : IMarriageService
+    public class MarriageService(IMarriageRepository repository, IPersonService personService, ILifeEventService lifeEvent, IUnitOfWork unitOfWork) : IMarriageService
     {
         private readonly IMarriageRepository _repository = repository;
+
         private readonly IPersonService _personService = personService;
+
         private readonly ILifeEventService _lifeEventService = lifeEvent;
+
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<MarriageDTO> CreateMarriageAsync(RequestAddMarriageDTO dto)
         {
@@ -23,23 +27,36 @@ namespace FamilyTree.API.Services
                 BeginDate = dto.BeginDate
             };
 
-            await _lifeEventService.AddEventAsync(
-                dto.Spouse1Id,
-                LifeEventType.Marriage,
-                dto.BeginDate,
-                $"Брак с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
-            );
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
 
-            await _lifeEventService.AddEventAsync(
-                dto.Spouse2Id,
-                LifeEventType.Marriage,
-                dto.BeginDate,
-                $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
-            );
+                await _repository.AddAsync(marriage);
 
-            await _repository.AddAsync(marriage);
+                await _lifeEventService.AddEventAsync(
+                    dto.Spouse1Id,
+                    LifeEventType.Marriage,
+                    dto.BeginDate,
+                    $"Брак с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
+                );
 
-            return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
+                await _lifeEventService.AddEventAsync(
+                    dto.Spouse2Id,
+                    LifeEventType.Marriage,
+                    dto.BeginDate,
+                    $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
+                );
+
+                await _unitOfWork.CommitTransactionAsync();
+
+                return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+
+                throw;
+            }
         }
 
         public async Task<MarriageDTO?> DivorceAsync(RequestAddDivorceDTO dto)
@@ -57,23 +74,36 @@ namespace FamilyTree.API.Services
             marriage.EndDate = dto.DivorceDate;
             marriage.EndReason = dto.EndReason;
 
-            await _lifeEventService.AddEventAsync(
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+
+                await _repository.UpdateAsync(marriage);
+
+                await _lifeEventService.AddEventAsync(
                     marriage.Spouse1Id,
                     LifeEventType.Divorce,
                     marriage.BeginDate,
                     $"Развод с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
                 );
 
-            await _lifeEventService.AddEventAsync(
-                marriage.Spouse2Id,
-                LifeEventType.Divorce,
-                marriage.BeginDate,
-                $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
-            );
+                await _lifeEventService.AddEventAsync(
+                    marriage.Spouse2Id,
+                    LifeEventType.Divorce,
+                    marriage.BeginDate,
+                    $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
+                );
 
-            await _repository.UpdateAsync(marriage);
+                await _unitOfWork.CommitTransactionAsync();
 
-            return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
+                return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+
+                throw;
+            }
         }
 
         public async Task<ShortPersonDTO?> GetCurrentSpouseAsync(Guid personId)
