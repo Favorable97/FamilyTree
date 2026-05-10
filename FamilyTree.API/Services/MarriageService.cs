@@ -3,7 +3,13 @@ using FamilyTree.Data.Interfaces;
 
 namespace FamilyTree.API.Services
 {
-    public class MarriageService(IMarriageRepository repository, IPersonService personService, ILifeEventService lifeEvent, IUnitOfWork unitOfWork) : IMarriageService
+    public class MarriageService(
+        IMarriageRepository repository, 
+        IPersonService personService, 
+        ILifeEventService lifeEvent, 
+        IUnitOfWork unitOfWork, 
+        ILogger<MarriageService> logger) 
+        : IMarriageService
     {
         private readonly IMarriageRepository _repository = repository;
 
@@ -12,6 +18,8 @@ namespace FamilyTree.API.Services
         private readonly ILifeEventService _lifeEventService = lifeEvent;
 
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+
+        private readonly ILogger<MarriageService> _logger = logger;
 
         public async Task<MarriageDTO> CreateMarriageAsync(RequestAddMarriageDTO dto)
         {
@@ -48,6 +56,14 @@ namespace FamilyTree.API.Services
                 );
 
                 await _unitOfWork.CommitTransactionAsync();
+
+                _logger.LogInformation(
+                    $"Брак успешно создан. " +
+                    $"Spouse1Id: {spouse1.Id}. " +
+                    $"Spouse2Id: {spouse2.Id}. " +
+                    $"LifeEventType: {LifeEventType.Marriage.ToString()}. " +
+                    $"BeginDate: {dto.BeginDate}"
+                    );
 
                 return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
             }
@@ -93,6 +109,15 @@ namespace FamilyTree.API.Services
                     marriage.BeginDate,
                     $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
                 );
+
+                _logger.LogInformation(
+                    $"Брак успешно расторгнут. " +
+                    $"Spouse1Id: {spouse1.Id}. " +
+                    $"Spouse2Id: {spouse2.Id}. " +
+                    $"LifeEventType: {LifeEventType.Divorce.ToString()}. " +
+                    $"EndDate: {dto.DivorceDate}. " +
+                    $"Reason: {dto.EndReason}"
+                    );
 
                 await _unitOfWork.CommitTransactionAsync();
 
