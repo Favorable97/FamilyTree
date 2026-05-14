@@ -25,7 +25,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.ExistsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(true);
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             var dto = new RequestAddPersonDTO
             {
@@ -58,7 +58,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.GetAllPersonAsync())
                 .ReturnsAsync(people);
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             var result = await service.GetAllPersonAsync();
 
@@ -108,7 +108,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.GetPersonByIdAsync(fatherId))
                 .ReturnsAsync(father);
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             var result = await service.GetPersonByIdAsync(personId);
 
@@ -132,7 +132,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.GetPersonByIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync((Person)null!);
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             var personId = Guid.NewGuid();
 
@@ -160,7 +160,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.GetPersonByIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(dto);
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             var personId = Guid.NewGuid();
 
@@ -202,9 +202,9 @@ namespace FamilyTree.Tests.Services
                 Gender = dto.Gender
             };
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
-            var result = service.CreatePersonAsync(data);
+            var result = await service.CreatePersonAsync(data);
 
             result.Should().NotBeNull();
 
@@ -249,7 +249,7 @@ namespace FamilyTree.Tests.Services
                 Gender = person.Gender
             };
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             var result = await service.CreatePersonAsync(data);
 
@@ -284,7 +284,7 @@ namespace FamilyTree.Tests.Services
                 Gender = Data.Utils.Gender.Male
             };
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             Func<Task> act = () => service.UpdatePersonAsync(id, dto);
 
@@ -319,7 +319,7 @@ namespace FamilyTree.Tests.Services
                 DeathDate = new(2001, 5, 2)
             };
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             var result = await service.UpdatePersonAsync(person.Id, dto);
 
@@ -328,7 +328,7 @@ namespace FamilyTree.Tests.Services
             lifeEvent.Verify(s => s.AddEventAsync(
                 result.Id,
                 LifeEventType.Death,
-                result.DeathDate.Value
+                dto.DeathDate!.Value
             ), Times.Once);
         }
 
@@ -349,7 +349,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.IsParentAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(true);
 
-            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance);
+            var service = new PersonService(repo.Object, lifeEvent.Object, NullLogger<PersonService>.Instance, new Mock<IUnitOfWork>().Object);
 
             Func<Task> act = () => service.DeletePersonAsync(id);
 
@@ -357,4 +357,6 @@ namespace FamilyTree.Tests.Services
         }
     }
 }
+
+
 

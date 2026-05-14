@@ -7,8 +7,8 @@ using FluentAssertions;
 using Xunit;
 using FamilyTree.API.Interfaces;
 using FamilyTree.Data.Utils;
-using Microsoft.AspNetCore.Components.Forms;
 using FamilyTree.Data.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FamilyTree.Tests.Services
 {
@@ -34,7 +34,7 @@ namespace FamilyTree.Tests.Services
                     BirthDate = new(2010, 1, 1)
                 });
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var dto = new RequestAddMarriageDTO()
             {
@@ -94,7 +94,7 @@ namespace FamilyTree.Tests.Services
                     BirthDate = new(2000, 04, 20)
                 });
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var dto = new RequestAddDivorceDTO
             {
@@ -151,7 +151,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.GetActiveMarriageAsync(spouse2))
                 .ReturnsAsync(new Marriage());
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var dto = new RequestAddMarriageDTO
             {
@@ -218,7 +218,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.AddAsync(It.IsAny<Marriage>()))
                 .Returns(Task.CompletedTask);
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var dto = new RequestAddMarriageDTO
             {
@@ -288,7 +288,7 @@ namespace FamilyTree.Tests.Services
                     BirthDate = new(1995, 1, 15),
                 });
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var result = await service.GetCurrentSpouseAsync(personId);
 
@@ -309,7 +309,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(r => r.GetActiveMarriageAsync(personId))
                 .ReturnsAsync((Marriage?)null);
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var result = await service.GetCurrentSpouseAsync(personId);
 
@@ -358,7 +358,7 @@ namespace FamilyTree.Tests.Services
                     Id = id
                 });
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var result = await service.GetMarriageHistoryAsync(personId);
 
@@ -407,7 +407,7 @@ namespace FamilyTree.Tests.Services
                 EndReason = MarriageEndReason.SpouseMissing
             };
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var result = await service.DivorceAsync(dto);
             
@@ -435,7 +435,7 @@ namespace FamilyTree.Tests.Services
                 .ReturnsAsync(new ShortPersonDTO() { LastName = "First", FirstName = "Person"})
                 .ReturnsAsync((ShortPersonDTO?)null!);
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var dto = new RequestAddMarriageDTO()
             {
@@ -489,9 +489,9 @@ namespace FamilyTree.Tests.Services
                 BeginDate = new(2025, 1, 1)
             };
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
-            var result = service.CreateMarriageAsync(dtoMarriage);
+            await service.CreateMarriageAsync(dtoMarriage);
 
             lifeEvent
                 .Verify(le => le.AddEventAsync(
@@ -527,7 +527,7 @@ namespace FamilyTree.Tests.Services
                 EndReason = MarriageEndReason.DivorceByConsent
             };
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             Func<Task> act = () => service.DivorceAsync(dto);
 
@@ -569,7 +569,7 @@ namespace FamilyTree.Tests.Services
                 EndReason = MarriageEndReason.DivorceByConsent
             };
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             Func<Task<MarriageDTO?>> act = () => service.DivorceAsync(dto);
 
@@ -598,7 +598,7 @@ namespace FamilyTree.Tests.Services
 
             var id = Guid.NewGuid();
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var result = await service.GetMarriageHistoryAsync(id);
 
@@ -631,7 +631,7 @@ namespace FamilyTree.Tests.Services
                 .Setup(s => s.GetShortPersonByIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(new ShortPersonDTO() { Id = marriage.Spouse1Id, LastName = "Find" });
 
-            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object);
+            var service = new MarriageService(repo.Object, personService.Object, lifeEvent.Object, new Mock<IUnitOfWork>().Object, NullLogger<MarriageService>.Instance);
 
             var result = await service.GetCurrentSpouseAsync(marriage.Spouse2Id);
 
@@ -640,3 +640,5 @@ namespace FamilyTree.Tests.Services
         }
     }
 }
+
+
