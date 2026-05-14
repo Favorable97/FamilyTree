@@ -58,12 +58,15 @@ namespace FamilyTree.API.Services
                 await _unitOfWork.CommitTransactionAsync();
 
                 _logger.LogInformation(
-                    $"Брак успешно создан. " +
-                    $"Spouse1Id: {spouse1.Id}. " +
-                    $"Spouse2Id: {spouse2.Id}. " +
-                    $"LifeEventType: {LifeEventType.Marriage.ToString()}. " +
-                    $"BeginDate: {dto.BeginDate}"
-                    );
+                    "Брак успешно создан. " +
+                    "Spouse1Id: {Spouse1Id}. " +
+                    "Spouse2Id: {Spouse2Id}. " +
+                    "LifeEventType: {LifeEventType}. " +
+                    "BeginDate: {BeginDate}.",
+                    spouse1.Id,
+                    spouse2.Id,
+                    LifeEventType.Marriage,
+                    dto.BeginDate);
 
                 return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
             }
@@ -99,27 +102,31 @@ namespace FamilyTree.API.Services
                 await _lifeEventService.AddEventAsync(
                     marriage.Spouse1Id,
                     LifeEventType.Divorce,
-                    marriage.BeginDate,
+                    marriage.EndDate.Value,
                     $"Развод с {GetFullName(spouse2.LastName, spouse2.FirstName, spouse2.MiddleName)}"
                 );
 
                 await _lifeEventService.AddEventAsync(
                     marriage.Spouse2Id,
                     LifeEventType.Divorce,
-                    marriage.BeginDate,
-                    $"Брак с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
+                    marriage.EndDate.Value,
+                    $"Развод с {GetFullName(spouse1.LastName, spouse1.FirstName, spouse1.MiddleName)}"
                 );
 
-                _logger.LogInformation(
-                    $"Брак успешно расторгнут. " +
-                    $"Spouse1Id: {spouse1.Id}. " +
-                    $"Spouse2Id: {spouse2.Id}. " +
-                    $"LifeEventType: {LifeEventType.Divorce.ToString()}. " +
-                    $"EndDate: {dto.DivorceDate}. " +
-                    $"Reason: {dto.EndReason}"
-                    );
-
                 await _unitOfWork.CommitTransactionAsync();
+
+                _logger.LogInformation(
+                    "Брак успешно расторгнут. " +
+                    "Spouse1Id: {Spouse1Id}. " +
+                    "Spouse2Id: {Spouse2Id}. " +
+                    "LifeEventType: {LifeEventType}. " +
+                    "EndDate: {EndDate}. " +
+                    "Reason: {Reason}.",
+                    spouse1.Id,
+                    spouse2.Id,
+                    LifeEventType.Divorce,
+                    dto.DivorceDate,
+                    dto.EndReason);
 
                 return MarriageMapper.MapToMarriageDTO(marriage, spouse1, spouse2);
             }

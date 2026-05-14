@@ -41,7 +41,7 @@ namespace FamilyTree.API.Services
 
             try
             {
-                await unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync();
 
                 await _repository.CreatePersonAsync(person);
 
